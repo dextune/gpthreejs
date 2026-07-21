@@ -13,6 +13,8 @@ contributors have one stable entry point.
 
 - [ChatGPT App Game Animation Upgrade](./planning/chatgpt-app-game-animation-upgrade.md) - product plan, release slices, schemas, risks, and acceptance criteria.
 - [Multi-Agent Execution Prompt](./planning/multiagent-execution-prompt.md) - role and model routing prompt for executing the upgrade.
+- [Quality Upgrade Execution Plan](./planning/quality-upgrade-execution/readme.md) - Korean topic plans, release gates, and a progress-tracked implementation task list based on the knight quality review.
+- [Quality Upgrade Multi-Agent Goal](./planning/quality-upgrade-execution/08-multi-agent-goal-prompt.md) - execution-ready model routing, agent roles, review loops, and milestone gates for the quality upgrade.
 
 ## ChatGPT App
 
