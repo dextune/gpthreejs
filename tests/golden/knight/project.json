@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "BluePlumeKnight",
+  "useCharacterSlice": true,
+  "includePolish": true,
+  "strict": true,
+  "deliveryGrade": "delivery",
+  "requestPath": "request-spec.json",
+  "referenceSetPath": "reference-set.json"
+}

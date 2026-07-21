@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from engine.blueprint.validate import summarize_layers
+from engine.critique.journal import is_policy_issued_decision
 from engine.shared.jsonutil import dump_json, load_json
 
 
@@ -26,13 +27,17 @@ def check(path: str | Path, layer: str) -> dict[str, Any]:
 
 
 def sync(path: str | Path, *, in_place: bool = True) -> dict[str, Any]:
-    """Advance layers: first open with accept in journal → done; unlock next."""
+    """Advance layers: first open with policy-issued accept in journal → done."""
     bp = load_json(path)
     layers = bp.get("layers") or {}
     order = list(layers.keys())
     journal = bp.get("journal") or []
 
-    accepted = {j["layer"] for j in journal if j.get("decision") == "accept"}
+    accepted = {
+        j["layer"]
+        for j in journal
+        if j.get("decision") == "accept" and is_policy_issued_decision(j, "accept")
+    }
 
     for i, lid in enumerate(order):
         if lid in accepted:

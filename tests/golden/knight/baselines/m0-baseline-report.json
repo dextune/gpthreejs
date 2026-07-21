@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "status": "baseline-captured",
+  "date": "2026-07-21",
+  "repository": {
+    "commit": "5d658c6d1d309648f3727800a969483416641410",
+    "shortCommit": "5d658c6",
+    "worktreeState": "dirty-with-m0-baseline-changes",
+    "artifactSetFingerprint": {
+      "algorithm": "sha256(sorted '<relative-path>  <file-sha256>' lines joined with '\\n' and one terminal '\\n')",
+      "scopeNote": "Covers the tracked M0 baseline fixture and its validation test. This is an artifact-set checksum, not a full reconstruction of the dirty source state that produced the command baseline.",
+      "value": "dc9e18e517c648928e289473a8036e1ccb598cf28f808f90b0c6cadaea069891",
+      "files": [
+        "tests/golden/knight/blueprints/v0-shallow.json",
+        "tests/golden/knight/expected-contracts/v2-character-depth-failures.json",
+        "tests/golden/knight/manifest.json",
+        "tests/golden/knight/reports/obs-traceability.json",
+        "tests/test_knight_m0_baseline.py"
+      ]
+    }
+  },
+  "commands": {
+    "pythonTests": {
+      "command": "python3 -m unittest discover -s tests -v",
+      "exitCode": 0,
+      "durationSeconds": 6.49,
+      "testCount": 23,
+      "result": "pass",
+      "summary": "Ran 23 tests in 6.288s; OK"
+    },
+    "demoBuild": {
+      "command": "npm --prefix demo run build",
+      "exitCode": 0,
+      "durationSeconds": 1.32,
+      "result": "pass-with-warning",
+      "summary": "Vite build transformed 15 modules and emitted dist/assets/index-Bu9k8q_o.js at 539.54 kB.",
+      "warnings": [
+        {
+          "code": "VITE_CHUNK_SIZE_GT_500KB",
+          "message": "Some chunks are larger than 500 kB after minification.",
+          "observedChunk": "dist/assets/index-Bu9k8q_o.js",
+          "observedSizeKb": 539.54,
+          "followUpTasks": [
+            "OBS-10",
+            "PERF-110",
+            "PERF-120"
+          ]
+        }
+      ]
+    }
+  },
+  "contractChecks": {
+    "currentV1StrictValidation": {
+      "command": "python3 -m engine validate tests/golden/knight/blueprints/v0-shallow.json --strict",
+      "expected": "fail",
+      "meaning": "BP-111 strict character-depth validation now rejects the tracked shallow character baseline with explicit target failure codes."
+    }
+  },
+  "priorLocalWorkArtifacts": [
+    {
+      "path": "demo/work/sense/sense_pack.json",
+      "kind": "sense-pack",
+      "sha256": "3a9482c2adcc44c8e0111a0d3438312a3f512c441f80ec40b34c3a34053ddd6d"
+    },
+    {
+      "path": "demo/work/sufficiency.json",
+      "kind": "sufficiency-report",
+      "sha256": "7e0dccf3d4af2de06abc267014b7dde39000aa08be8f4ea7a935fd231303e2e8"
+    },
+    {
+      "path": "demo/work/ledger.json",
+      "kind": "feature-ledger",
+      "sha256": "ad8141d31069bb4562858a03a404c29b74446f569a393e39a3f06628c036d496"
+    },
+    {
+      "path": "demo/work/blueprint.json",
+      "kind": "blueprint-v1",
+      "sha256": "2bb44fe7d303f568bc37da528c37dc54cda936b9cf19571ca41f51eeb3b82d54"
+    }
+  ],
+  "missingEvidence": [
+    "canonical beauty render",
+    "alpha render",
+    "browser console/pageerror log"
+  ],
+  "nextTasks": [
+    "DX-101",
+    "DX-110",
+    "RND-101",
+    "M0-009",
+    "M0-010",
+    "M0-011"
+  ]
+}

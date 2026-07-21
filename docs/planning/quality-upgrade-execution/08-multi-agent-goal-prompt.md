@@ -6,6 +6,8 @@
 
 M7 ChatGPT App은 기본 Goal에서 제외한다. M4~M6가 완료되고 사용자가 별도로 승인한 경우에만 후속 Goal로 시작한다.
 
+`{REPOSITORY_ROOT}`는 이 파일이 들어 있는 현재 gpthreejs checkout의 절대 경로로 바꾼다. 예: `/home/dextune/project/gpthreejs`.
+
 ## 모델 배치
 
 | 업무 | 모델 |
@@ -24,12 +26,12 @@ GOAL NAME
 gpthreejs-quality-upgrade-m0-m6
 
 OBJECTIVE
-C:\Project\gpthreejs에서 gpthreejs 품질 고도화 계획의 M0~M6를 순서대로 구현하고 검증하라.
+{REPOSITORY_ROOT}에서 gpthreejs 품질 고도화 계획의 M0~M6를 순서대로 구현하고 검증하라.
 기사 캐릭터 실패 사례를 기준 회귀 fixture로 사용하되, generic prop과 비기사 stylized character에서도 동작하는 일반 계약을 만들어 과적합을 막아라.
 최종 결과는 참조 근거, Blueprint, 생성 TypeScript, 실제 Three.js render evidence, metrics, review policy, iteration history가 연결된 fail-closed pipeline이어야 한다.
 
 REPOSITORY
-C:\Project\gpthreejs
+{REPOSITORY_ROOT}
 
 AUTHORITATIVE DOCUMENTS
 작업 시작 전에 다음 파일을 모두 읽고 충돌 시 아래 우선순위를 적용하라.
@@ -65,7 +67,7 @@ TEAM
 
 2. Architecture and Contract Analyst, sol high
    - 현재 코드를 조사하고 task별 최소 변경 경계, data flow, migration, blast radius를 설계한다.
-   - codebase-memory-mcp를 먼저 사용한다. index_repository 후 search_graph, trace_path, query_graph, get_code_snippet 순으로 필요한 범위만 조사한다.
+   - 사용 가능한 repo index/code-intel 도구가 있으면 먼저 사용한다. 없으면 `rg`, `find`, focused file reads, targeted tests로 필요한 범위만 조사한다.
    - 구현 전에 Work Packet을 작성하고 Lead Supervisor 승인을 받는다.
 
 3. Visual Quality and Acceptance Analyst, sol high
@@ -116,7 +118,7 @@ TEAM
 OPERATING RULES
 
 1. 저장소 상태를 먼저 확인하고 사용자의 기존 변경을 보존한다.
-2. 코드 구조 탐색은 AGENTS.md의 codebase-memory 우선 규칙을 따른다.
+2. 코드 구조 탐색은 AGENTS.md와 현재 환경에서 사용 가능한 repo-local 도구를 따른다. 도구가 없다는 이유로 멈추지 말고 read-only shell 탐색으로 대체한다.
 3. tasklist에 없는 새 scope는 바로 구현하지 않는다. Lead Supervisor가 Decision log에 추가하거나 별도 task를 만든 뒤 진행한다.
 4. 한 agent는 동시에 하나의 Work Packet만 소유한다.
 5. 동일 module directory를 두 coding agent가 동시에 수정하지 않는다.
@@ -314,7 +316,7 @@ FINAL REPORT
 상위 시스템이 긴 프롬프트 파일을 직접 읽을 수 있을 때는 다음만 전달해도 된다.
 
 ```text
-C:\Project\gpthreejs에서
+{REPOSITORY_ROOT}에서
 docs/planning/quality-upgrade-execution/08-multi-agent-goal-prompt.md의
 "복사해서 실행할 Goal 프롬프트"를 최상위 Goal로 실행하라.
 

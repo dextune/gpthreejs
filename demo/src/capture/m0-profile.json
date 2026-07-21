@@ -1,0 +1,16 @@
+{
+  "id": "knight-source-34-m0",
+  "viewport": {
+    "width": 640,
+    "height": 640,
+    "deviceScaleFactor": 1
+  },
+  "camera": {
+    "fov": 40,
+    "position": [2.6, 1.7, 3.4],
+    "target": [0, 1.0, 0],
+    "near": 0.1,
+    "far": 100
+  },
+  "lightRigId": "m0-neutral-key-fill-rim"
+}

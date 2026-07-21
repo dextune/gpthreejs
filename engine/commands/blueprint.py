@@ -25,6 +25,18 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     p.add_argument("--sense", required=True)
     p.add_argument("--out", required=True)
     p.add_argument("--grid", type=int, default=3)
+    p.add_argument(
+        "--mode",
+        default="production",
+        choices=["production", "authoring"],
+        help="production forbids TODO stubs; authoring allows skeleton TODOs",
+    )
+    p.add_argument(
+        "--modeling-profile",
+        default="generic-prop",
+        help="generic-prop|hard-surface-hero|stylized-character",
+    )
+    p.add_argument("--target-min", type=int, default=None)
     bind(p, run_ledger)
 
     p = subparsers.add_parser("blueprint", help="Draft Form Blueprint")
@@ -39,6 +51,11 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     p.add_argument("blueprint")
     p.add_argument("--strict", action="store_true")
     bind(p, run_validate)
+
+    p = subparsers.add_parser("migrate-v1-to-v2", help="Migrate a v1 Blueprint to Blueprint v2")
+    p.add_argument("blueprint")
+    p.add_argument("--out", required=True)
+    bind(p, run_migrate_v1_to_v2)
 
     p = subparsers.add_parser("layers", help="Layer state")
     p.add_argument("action", choices=["status", "check", "sync"])
@@ -68,7 +85,17 @@ def run_brief(args: argparse.Namespace) -> int:
 def run_ledger(args: argparse.Namespace) -> int:
     from engine.blueprint.draft import draft_ledger
 
-    print_json(draft_ledger(args.image, args.sense, args.out, grid=args.grid))
+    print_json(
+        draft_ledger(
+            args.image,
+            args.sense,
+            args.out,
+            grid=args.grid,
+            mode=args.mode,
+            modeling_profile=args.modeling_profile,
+            target_min=args.target_min,
+        )
+    )
     return 0
 
 
@@ -93,6 +120,13 @@ def run_validate(args: argparse.Namespace) -> int:
     result = validate_blueprint(args.blueprint, strict=args.strict)
     print_json(result.to_dict())
     return 0 if result.ok else 2
+
+
+def run_migrate_v1_to_v2(args: argparse.Namespace) -> int:
+    from engine.blueprint.migrate import migrate_v1_to_v2_file
+
+    print_json(migrate_v1_to_v2_file(args.blueprint, args.out))
+    return 0
 
 
 def run_layers(args: argparse.Namespace) -> int:

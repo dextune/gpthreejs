@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 
 from engine.commands._shared import bind, print_json
 from engine.contracts.modes import DETAIL_LEVELS
@@ -12,6 +13,11 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     p = subparsers.add_parser("cast", help="Emit TypeScript factory")
     p.add_argument("blueprint")
     p.add_argument("--out", required=True)
+    p.add_argument(
+        "--out-dir",
+        dest="out_dir",
+        help="Also emit a portable bundle directory (factory + surface presets + manifest)",
+    )
     bind(p, run_cast)
 
     p = subparsers.add_parser("fit", help="CPU parameter fit vs matte")
@@ -56,10 +62,25 @@ def register(subparsers: argparse._SubParsersAction) -> None:
 
 def run_cast(args: argparse.Namespace) -> int:
     from engine.cast.emit_factory import emit_factory
+    from engine.runtime.portable import emit_portable_bundle
     from engine.shared.jsonutil import load_json
 
     path = emit_factory(load_json(args.blueprint), args.out)
-    print_json({"out": path})
+    result: dict = {"out": path}
+    if args.out_dir:
+        factory_source = Path(path).read_text(encoding="utf-8")
+        preset_path = Path(__file__).resolve().parents[2] / "demo" / "src" / "detail" / "surfacePresets.ts"
+        surface_module = preset_path.read_text(encoding="utf-8") if preset_path.exists() else None
+        manifest = emit_portable_bundle(
+            factory_source=factory_source,
+            out_dir=args.out_dir,
+            surface_preset_module=surface_module,
+        )
+        result["bundle"] = {"outDir": args.out_dir, "manifest": manifest}
+        if manifest.get("externalPathLeaks"):
+            print_json(result)
+            return 2
+    print_json(result)
     return 0
 
 

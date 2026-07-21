@@ -1,0 +1,63 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install package
+        run: |
+          python -m pip install -U pip
+          python -m pip install -e .
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+      - name: CLI smoke
+        run: |
+          python -m engine --help
+          gpthreejs --help
+
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install demo deps
+        run: npm --prefix demo ci --include=dev
+      - name: Typecheck and build
+        run: |
+          npm --prefix demo run typecheck
+          npm --prefix demo run build
+      - name: Preflight
+        run: npm --prefix demo run preflight
+      - name: Runtime smoke
+        run: |
+          npm --prefix demo run provision:browser
+          npm --prefix demo run test:runtime
+
+  portability:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Wheel build and install smoke
+        run: |
+          python -m pip install -U pip build
+          python -m build
+          python -m pip install --force-reinstall dist/*.whl
+          gpthreejs --help
+          python -m engine --help

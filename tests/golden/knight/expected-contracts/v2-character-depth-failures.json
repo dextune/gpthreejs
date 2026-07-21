@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "fixture": "tests/golden/knight/blueprints/v0-shallow.json",
+  "currentContract": {
+    "validator": "engine.blueprint.validate.validate_blueprint(strict=True)",
+    "expected": "fail",
+    "reason": "BP-111 promotes the known v0 shallow knight character-depth gaps into strict validation errors while keeping non-character v1 compatibility."
+  },
+  "targetV2Contract": {
+    "expected": "fail",
+    "requiredFailureCodes": [
+      "CHARACTER_PARTS_TOO_SHALLOW",
+      "CHARACTER_MISSING_PROPORTION_MEASUREMENTS",
+      "CHARACTER_MISSING_LANDMARKS",
+      "CHARACTER_MISSING_SOCKET_CONTACTS",
+      "CHARACTER_IDENTITY_GEOMETRY_NOT_SEPARATED",
+      "CHARACTER_LAYERED_DETAIL_NOT_SEPARATED"
+    ]
+  },
+  "gateFailures": {
+    "A_reference_camera": [
+      "source-aligned and neutral turnaround cameras are not declared"
+    ],
+    "B_mass_pose": [
+      "head/body ratio, stance, limb thickness, and pose are not measurable from explicit landmarks"
+    ],
+    "C_identity_geometry": [
+      "helmet, plume, shield, and sword are ledger cues but not separated identity geometry"
+    ],
+    "D_attachment": [
+      "sword, shield, plume, and cape have no socket/contact evidence"
+    ],
+    "E_material_readability": [
+      "material readability has no neutral-light render evidence or black-crush/clipping metrics"
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>gpthreejs runtime smoke failure fixture</title>
+  </head>
+  <body>
+    <div id="app">intentional runtime failure fixture</div>
+    <script type="module">
+      console.error("[gpthreejs-smoke-fixture] intentional console error");
+      setTimeout(() => {
+        throw new Error("[gpthreejs-smoke-fixture] intentional page error");
+      }, 0);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "subject": "wooden crate",
+  "intent": "game",
+  "modelingProfile": "generic-prop",
+  "qualityMode": "sharp",
+  "deliveryGrade": "standard",
+  "mustHave": [
+    {
+      "id": "crate_mass",
+      "weight": 1.0
+    }
+  ],
+  "mustNotHave": [],
+  "targetViews": [
+    "front"
+  ],
+  "requiredViews": [
+    "front"
+  ]
+}

@@ -9,13 +9,16 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="gpthreejs", description="gpthreejs pipeline CLI")
     subparsers = parser.add_subparsers(dest="cmd", required=True)
 
-    from engine.commands import blueprint, cast, critique, sense
+    from engine.commands import blueprint, cast, critique, delivery, reference, run, sense
 
     for register in (
         sense.register,
         blueprint.register,
         cast.register,
         critique.register,
+        reference.register,
+        run.register,
+        delivery.register,
     ):
         register(subparsers)
 

@@ -1,0 +1,179 @@
+{
+  "schemaVersion": 2,
+  "name": "BluePlumeKnight",
+  "qualityMode": "sharp",
+  "modelingProfile": "stylized-character",
+  "intent": "game",
+  "revision": {
+    "id": "rev-0001",
+    "parent": null,
+    "contentHash": "cc7d7447eaba6e485bd24ea4048cb501423986bece4050c359a9e218281dcfd4"
+  },
+  "proportionProfile": {
+    "headUnits": 4.2,
+    "headHeightRatio": 0.235,
+    "shoulderWidthRatio": 0.42,
+    "limbThickness": "chunky"
+  },
+  "poseProfile": {
+    "id": "source-34",
+    "mirrored": false,
+    "joints": {
+      "root": {
+        "parent": null,
+        "translation": [0, 0, 0],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1]
+      }
+    },
+    "shield-grip": {
+      "id": "shield-grip",
+      "partId": "shield",
+      "type": "socket",
+      "transform": {
+        "translation": [0, 0, -0.04],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1]
+      }
+    }
+  },
+  "landmarks": [
+    {
+      "id": "crown",
+      "semantic": "top of helmet plume",
+      "space": "normalized-2d",
+      "position": [0.5, 0.08]
+    },
+    {
+      "id": "shield-center",
+      "semantic": "shield center",
+      "space": "normalized-2d",
+      "position": [0.32, 0.55]
+    }
+  ],
+  "parts": [
+    {
+      "id": "torso",
+      "name": "Torso",
+      "role": "torso",
+      "geometry": {
+        "kind": "rounded-box",
+        "size": [0.58, 0.78, 0.32],
+        "radius": 0.08
+      },
+      "materialId": "steel",
+      "transform": {
+        "translation": [0, 0.35, 0],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1]
+      },
+      "children": [
+        {
+          "id": "helmet",
+          "name": "Helmet",
+          "role": "head",
+          "geometry": {
+            "kind": "lathe",
+            "profile": [[0.0, 0.0], [0.24, 0.08], [0.28, 0.32], [0.0, 0.42]]
+          },
+          "materialId": "steel",
+          "transform": {
+            "translation": [0, 0.62, 0],
+            "rotation": [0, 0, 0],
+            "scale": [1, 1, 1]
+          },
+          "children": []
+        },
+        {
+          "id": "shield",
+          "name": "Shield",
+          "role": "held-equipment",
+          "geometry": {
+            "kind": "shape-extrude",
+            "shape": "kite-shield",
+            "depth": 0.06
+          },
+          "materialId": "blue-paint",
+          "transform": {
+            "translation": [-0.45, 0.22, 0.08],
+            "rotation": [0, 0.15, 0],
+            "scale": [1, 1, 1]
+          },
+          "attachment": {
+            "parentSocket": "hand-l-grip",
+            "childSocket": "shield-grip",
+            "contact": "strap",
+            "maxGap": 0.015,
+            "maxPenetration": 0.01,
+            "required": true
+          },
+          "children": []
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "id": "steel",
+      "name": "Brushed steel",
+      "role": "metal",
+      "channels": {
+        "baseColor": "#9ca3af",
+        "roughness": 0.42,
+        "metalness": 0.95
+      }
+    },
+    {
+      "id": "blue-paint",
+      "name": "Blue enamel",
+      "role": "paint",
+      "channels": {
+        "baseColor": "#2563eb",
+        "roughness": 0.48,
+        "metalness": 0.1
+      }
+    }
+  ],
+  "handles": {
+    "hand-l-grip": {
+      "id": "hand-l-grip",
+      "partId": "torso",
+      "type": "socket",
+      "transform": {
+        "translation": [-0.32, 0.2, 0.08],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1]
+      }
+    },
+    "shield-grip": {
+      "id": "shield-grip",
+      "partId": "shield",
+      "type": "socket",
+      "transform": {
+        "translation": [0, 0, -0.04],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1]
+      }
+    }
+  },
+  "renderProfiles": [
+    {
+      "id": "source-34",
+      "view": "front-left-34",
+      "camera": {
+        "projection": "orthographic",
+        "position": [1.4, 1.1, 2.4],
+        "target": [0, 0.35, 0]
+      },
+      "purpose": "source-aligned"
+    }
+  ],
+  "criticalFeatures": [
+    {
+      "id": "shield-readability",
+      "description": "Shield remains visibly attached and readable in the source-aligned view.",
+      "partIds": ["shield"],
+      "targetViews": ["source-34"]
+    }
+  ]
+}

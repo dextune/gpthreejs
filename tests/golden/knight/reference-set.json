@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "references": [
+    {
+      "id": "ref-source-34",
+      "path": "references/hero-source-34.png",
+      "assetHash": "6bdb8a7b912af2b4e6ad3af405b0cd4f4e24bc5105a663ae2aba8bfcba0ca99d",
+      "declaredView": "source-34",
+      "detectedView": "source-34",
+      "evidenceClass": "observed",
+      "visibleFeatures": [
+        "blue_feather_plume",
+        "large_sun_shield",
+        "broad_fantasy_sword"
+      ],
+      "palette": [
+        "#2850b4",
+        "#f0f0f0"
+      ],
+      "handedness": "right",
+      "equipment": [
+        "large_sun_shield",
+        "broad_fantasy_sword"
+      ]
+    },
+    {
+      "id": "ref-front",
+      "path": "references/hero-front.png",
+      "assetHash": "259ae8bce1eb7669abcf9ad7905e3da226279f6977774c1844f73e02cd150c53",
+      "declaredView": "front",
+      "detectedView": "front",
+      "evidenceClass": "observed",
+      "visibleFeatures": [
+        "blue_feather_plume",
+        "large_sun_shield",
+        "broad_fantasy_sword"
+      ],
+      "palette": [
+        "#2d55b9",
+        "#f0f0f0"
+      ],
+      "handedness": "right",
+      "equipment": [
+        "large_sun_shield",
+        "broad_fantasy_sword"
+      ]
+    },
+    {
+      "id": "ref-left",
+      "path": "references/hero-left.png",
+      "assetHash": "f73b69dd00ac579e50792814a3c9650c238804e90325636a44e4a8aeeae87c71",
+      "declaredView": "left",
+      "detectedView": "left",
+      "evidenceClass": "observed",
+      "visibleFeatures": [
+        "blue_feather_plume",
+        "broad_fantasy_sword"
+      ],
+      "palette": [
+        "#2850b4",
+        "#f0f0f0"
+      ],
+      "handedness": "right",
+      "equipment": [
+        "broad_fantasy_sword"
+      ]
+    },
+    {
+      "id": "ref-right",
+      "path": "references/hero-right.png",
+      "assetHash": "ef0884a424132611ba6f465f46e7fa15328bb8761cd0a077657f094dd99ac95c",
+      "declaredView": "right",
+      "detectedView": "right",
+      "evidenceClass": "observed",
+      "visibleFeatures": [
+        "blue_feather_plume",
+        "large_sun_shield"
+      ],
+      "palette": [
+        "#2850b4",
+        "#f0f0f0"
+      ],
+      "handedness": "right",
+      "equipment": [
+        "large_sun_shield"
+      ]
+    },
+    {
+      "id": "ref-back",
+      "path": "references/hero-back.png",
+      "assetHash": "10bd7104e4cfc8da09085cdbef4ad56888ea29face45b3416added62571a0a92",
+      "declaredView": "back",
+      "detectedView": "back",
+      "evidenceClass": "design-hypothesis",
+      "visibleFeatures": [
+        "blue_feather_plume"
+      ],
+      "origin": "generated",
+      "palette": [
+        "#234a9a",
+        "#f0f0f0"
+      ]
+    }
+  ],
+  "contentHash": "d4d7e11aa3b23da4e32ffd09695d4475fb999c0eaded3a620993ec5125635b83"
+}

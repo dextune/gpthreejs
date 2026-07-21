@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "reportId": "m0-v0-knight-gate-a-e-failure",
+  "fixtureId": "knight-quality-baseline",
+  "status": "fail-closed-baseline",
+  "created": "2026-07-21",
+  "purpose": "Lock the current shallow v0 knight Blueprint as an expected Gate A-E failure before Blueprint v2, canonical RenderSet, and metric schemas are implemented.",
+  "inputs": {
+    "referenceManifest": {
+      "path": "tests/golden/knight/manifest.json",
+      "sha256": "2d3ecdea4b3b120749a70f7f9a1dcb5b12ba2e2f1ff8ae9719f1eed428e8c6e4"
+    },
+    "blueprint": {
+      "path": "tests/golden/knight/blueprints/v0-shallow.json",
+      "sha256": "2595fa2e8f73aa178b0ea65b65248410615945daf810a048960772d740ad5034",
+      "currentV1StrictValidation": "fail",
+      "targetV2Contract": "fail"
+    },
+    "expectedV2Failures": {
+      "path": "tests/golden/knight/expected-contracts/v2-character-depth-failures.json",
+      "sha256": "b6cdacdd9c2ec3edb5645ae4532dae72b402f5ef4649db5bcfd806fc0d9c9e82"
+    },
+    "captureHarness": {
+      "command": "npm --prefix demo run capture:smoke",
+      "profilePath": "demo/src/capture/m0-profile.json",
+      "profileSha256": "b063c495e7c3ea563a9c47f3e2e927cf59fb9ae3216252c7d87e0808854d36b1",
+      "harnessPath": "demo/tests/capture-smoke.mjs",
+      "harnessSha256": "d73257c904184ac103c6ffca9727fa36eff5c495d08c114723ba866bccc0c100"
+    }
+  },
+  "captureHarnessEvidence": {
+    "schema": "m0-capture-harness-availability",
+    "artifactScope": "current-demo-factory-not-v0-shallow-blueprint",
+    "usage": "RND-101 proves deterministic browser beauty/alpha capture is available. These readback pixels are not used as proof for the v0-shallow Blueprint Gate A-E failures.",
+    "rendererVersion": "three-0.172.0+harness-m0",
+    "profileId": "knight-source-34-m0",
+    "viewport": {"width": 640, "height": 640, "deviceScaleFactor": 1},
+    "determinism": {
+      "method": "two captures of the same profile in one Playwright Chromium session must have identical readback hash, dimensions, and stats",
+      "command": "npm --prefix demo run capture:smoke",
+      "latestObservedResult": "pass",
+      "freshnessPolicy": "Run the command for fresh readback hashes; this static M0 report intentionally does not store pixel hashes."
+    }
+  },
+  "metricReport": {
+    "schema": "m0-gate-a-e-baseline",
+    "evidenceBasis": "static v0-shallow Blueprint and tracked fixture manifest; no rendered v0-shallow Blueprint pixels exist yet",
+    "overallDecision": "reject",
+    "gates": [
+      {
+        "id": "gate-a-reference-and-comparison",
+        "label": "Gate A",
+        "status": "fail",
+        "observations": ["OBS-04", "OBS-11"],
+        "failureCodes": ["SOURCE_ALIGNED_CAMERA_NOT_LOCKED", "LEFT_RIGHT_EQUIPMENT_MAPPING_UNVERIFIED"],
+        "evidence": "The manifest has source and turnaround references, but v0-shallow.json only points at the hero 3/4 source image and has no source-aligned camera/pose or equipment-side contract."
+      },
+      {
+        "id": "gate-b-mass-and-pose",
+        "label": "Gate B",
+        "status": "fail",
+        "observations": ["OBS-04", "OBS-05"],
+        "failureCodes": ["CHARACTER_PARTS_TOO_SHALLOW", "MISSING_PROPORTION_MEASUREMENTS", "MISSING_LANDMARKS"],
+        "evidence": "The baseline blueprint is a single root body with one accent child and lacks head/torso/arm/leg role separation, proportion measurements, landmarks, and pose measurements."
+      },
+      {
+        "id": "gate-c-identity-geometry",
+        "label": "Gate C",
+        "status": "fail",
+        "observations": ["OBS-03", "OBS-05", "OBS-06"],
+        "failureCodes": ["IDENTITY_GEOMETRY_NOT_SEPARATED", "PART_ID_EVIDENCE_MISSING"],
+        "evidence": "Helmet slit, plume, shield rim, and sword guard are ledger feature cues on a shallow body/accent structure instead of separately addressable identity geometry with part-ID evidence."
+      },
+      {
+        "id": "gate-d-attachment",
+        "label": "Gate D",
+        "status": "fail",
+        "observations": ["OBS-11"],
+        "failureCodes": ["SOCKET_CONTACTS_MISSING", "ATTACHMENT_CHAIN_UNVERIFIED"],
+        "evidence": "The v0 fixture has no hand, shield handle, plume root, cape anchor, or socket/contact distances; only accent_trim records a parent attachment."
+      },
+      {
+        "id": "gate-e-material-readability",
+        "label": "Gate E",
+        "status": "fail",
+        "observations": ["OBS-09"],
+        "failureCodes": ["MATERIAL_ROLE_COVERAGE_INCOMPLETE", "NEUTRAL_READABILITY_METRICS_MISSING"],
+        "evidence": "The blueprint defines steel, blue paint, and brass, but lacks cloth/leather role separation, albedo/material debug pass evidence, and black-crush/highlight-clipping metrics."
+      }
+    ]
+  },
+  "reviewPolicy": {
+    "recommendation": "reject",
+    "gateOrder": ["Gate A", "Gate B", "Gate C", "Gate D", "Gate E"],
+    "acceptAllowed": false,
+    "reason": "Every Gate A-E entry is an expected initial failure; later work must replace this baseline with measured pass/fail evidence before approval."
+  },
+  "followUpTasks": ["BP-111", "CHAR-101", "CHAR-110", "CHAR-120", "MAT-101", "ATT-101", "REV-101", "REV-110", "RND-110", "RND-130"]
+}

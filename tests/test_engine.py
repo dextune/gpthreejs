@@ -124,7 +124,17 @@ class gpthreejsTests(unittest.TestCase):
                 out=bp_path,
             )
             bp = load_json(bp_path)
-            bp["journal"] = [{"layer": "mass", "decision": "accept"}]
+            bp["journal"] = [
+                {
+                    "layer": "mass",
+                    "decision": "accept",
+                    "policyTrace": {
+                        "policyIssued": True,
+                        "issuer": "review-policy",
+                        "decision": "accept",
+                    },
+                }
+            ]
             bp_path.write_text(json.dumps(bp), encoding="utf-8")
             st = sync(bp_path, in_place=True)
             self.assertIn("mass", st["done"])

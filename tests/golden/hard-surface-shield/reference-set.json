@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "references": [
+    {
+      "id": "main",
+      "path": "references/main.png",
+      "assetHash": "da4a9571fcf3402d925c95feb9f610405a4bca5e3cb5d083bbdc8a87a204cfa1",
+      "declaredView": "front",
+      "detectedView": "front",
+      "evidenceClass": "observed",
+      "visibleFeatures": [
+        "sun_emblem"
+      ]
+    }
+  ],
+  "contentHash": "44a687f4e169a0c6eb516f852432157cdfe1d430355584d1d564d994e6b0f24f"
+}

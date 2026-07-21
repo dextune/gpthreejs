@@ -5,7 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from engine.blueprint.ledger_validation import validate_ledger_contract
 from engine.blueprint.schema import COMPLEXITY_LEDGER_MIN
+from engine.geometry.schema import validate_geometry_required_fields
 from engine.shared.jsonutil import load_json
 
 
@@ -30,6 +32,42 @@ def _walk_parts(parts: list[dict], acc: list[dict] | None = None) -> list[dict]:
     return acc
 
 
+def _validate_character_depth(bp: dict, parts: list[dict], res: ValidationResult) -> None:
+    if bp.get("domain") not in ("character", "hybrid"):
+        return
+
+    roles = {part.get("role") for part in parts}
+    if not {"head", "torso", "arm", "leg"}.issubset(roles):
+        res.errors.append(
+            "$.parts: CHARACTER_PARTS_TOO_SHALLOW: character requires separated head, torso, arm, and leg roles"
+        )
+
+    measurements = (bp.get("proportionProfile") or {}).get("measurements")
+    if not measurements:
+        res.errors.append(
+            "$.proportionProfile.measurements: CHARACTER_MISSING_PROPORTION_MEASUREMENTS"
+        )
+
+    if not bp.get("landmarks"):
+        res.errors.append("$.landmarks: CHARACTER_MISSING_LANDMARKS")
+
+    contacts = [(part.get("attachment") or {}).get("contact") for part in parts]
+    if not any(contacts):
+        res.errors.append("$.parts[].attachment.contact: CHARACTER_MISSING_SOCKET_CONTACTS")
+
+    identity_roles = {"helmet", "plume", "shield", "sword"}
+    if not identity_roles.intersection(roles):
+        res.errors.append(
+            "$.parts[].role: CHARACTER_IDENTITY_GEOMETRY_NOT_SEPARATED: expected helmet, plume, shield, or sword"
+        )
+
+    layered_roles = {"scarf", "strap", "brooch", "belt", "cape", "tabard"}
+    if len(layered_roles.intersection(roles)) < 2:
+        res.errors.append(
+            "$.parts[].role: CHARACTER_LAYERED_DETAIL_NOT_SEPARATED: expected at least two layered detail roles"
+        )
+
+
 def validate_blueprint(path: str | Path, *, strict: bool = False) -> ValidationResult:
     res = ValidationResult()
     try:
@@ -37,6 +75,11 @@ def validate_blueprint(path: str | Path, *, strict: bool = False) -> ValidationR
     except Exception as e:  # noqa: BLE001
         res.errors.append(f"cannot load: {e}")
         return res
+
+    if bp.get("schemaVersion") == 2:
+        from engine.blueprint.validate_v2 import validate_blueprint_v2
+
+        return validate_blueprint_v2(bp, strict=strict)
 
     if bp.get("version") != 1:
         res.warnings.append("version != 1")
@@ -57,6 +100,13 @@ def validate_blueprint(path: str | Path, *, strict: bool = False) -> ValidationR
             res.errors.append(f"part {p.get('id')} materialId {mid} missing")
         if not p.get("geometry"):
             res.errors.append(f"part {p.get('id')} missing geometry")
+        elif isinstance(p.get("geometry"), dict):
+            res.errors.extend(
+                validate_geometry_required_fields(
+                    p["geometry"],
+                    path=f"$.parts[{p.get('id')}].geometry",
+                )
+            )
         att = p.get("attachment")
         if att and att.get("parent") and att["parent"] not in part_ids:
             res.errors.append(f"part {p.get('id')} attachment parent missing")
@@ -80,29 +130,12 @@ def validate_blueprint(path: str | Path, *, strict: bool = False) -> ValidationR
     if len(entries) < ledger_min:
         res.errors.append(f"ledger filled entries {len(entries)} < min {ledger_min}")
 
-    # mapsTo linkage
-    feature_ids = set()
-    override_ids = set()
-    for p in parts:
-        for f in p.get("features") or []:
-            if f.get("id"):
-                feature_ids.add(f["id"])
-    for m in bp.get("materials") or []:
-        for o in m.get("overrides") or []:
-            if o.get("id"):
-                override_ids.add(o["id"])
-
-    for e in entries:
-        mt = e.get("mapsTo")
-        if not mt:
-            res.errors.append(f"ledger {e.get('id')} missing mapsTo")
-            continue
-        ref = mt.get("ref") if isinstance(mt, dict) else None
-        kind = mt.get("type") if isinstance(mt, dict) else None
-        if kind == "feature" and ref not in feature_ids:
-            res.errors.append(f"ledger {e.get('id')} mapsTo feature {ref} not found")
-        if kind == "override" and ref not in override_ids:
-            res.errors.append(f"ledger {e.get('id')} mapsTo override {ref} not found")
+    validate_ledger_contract(
+        bp,
+        parts,
+        res.errors,
+        require_character_coverage=bp.get("domain") in ("character", "hybrid"),
+    )
 
     if complexity in ("complex", "ultra") and len(parts) < 2:
         res.errors.append("complex object needs more than one part")
@@ -110,6 +143,7 @@ def validate_blueprint(path: str | Path, *, strict: bool = False) -> ValidationR
     if bp.get("domain") in ("character", "hybrid"):
         if "proportion" not in layers and "landmarks" not in layers:
             res.warnings.append("character domain without proportion/landmarks layers")
+        _validate_character_depth(bp, parts, res)
 
     body = bp.get("bodySource", "procedural")
     if body not in ("procedural", "hybrid-glb"):

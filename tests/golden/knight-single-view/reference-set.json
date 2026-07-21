@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "references": [
+    {
+      "id": "ref-only",
+      "path": "references/only.png",
+      "assetHash": "6bdb8a7b912af2b4e6ad3af405b0cd4f4e24bc5105a663ae2aba8bfcba0ca99d",
+      "declaredView": "source-34",
+      "detectedView": "source-34",
+      "evidenceClass": "observed",
+      "visibleFeatures": [
+        "blue_feather_plume"
+      ]
+    }
+  ],
+  "contentHash": "0a4746dcd2b47341e0ab886764ce4b884fa1e225ad7d855fa61a50fc7ac00b5b"
+}

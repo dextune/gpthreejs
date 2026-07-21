@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "references": [
+    {
+      "id": "front",
+      "path": "references/front.png",
+      "assetHash": "6bdb8a7b912af2b4e6ad3af405b0cd4f4e24bc5105a663ae2aba8bfcba0ca99d",
+      "declaredView": "front",
+      "detectedView": "front",
+      "evidenceClass": "observed",
+      "visibleFeatures": [
+        "blue_feather_plume",
+        "large_sun_shield"
+      ],
+      "palette": [
+        "#2850b4",
+        "#ccc"
+      ],
+      "equipment": [
+        "large_sun_shield"
+      ],
+      "handedness": "right"
+    },
+    {
+      "id": "side",
+      "path": "references/left.png",
+      "assetHash": "03032f22351fd7624b3f83d7592c94a89bb3c5e716232708235f9f9ea9689eb1",
+      "declaredView": "left",
+      "detectedView": "left",
+      "evidenceClass": "observed",
+      "visibleFeatures": [
+        "blue_feather_plume__mutated"
+      ],
+      "palette": [
+        "#c82828",
+        "#000"
+      ],
+      "equipment": [
+        "shield_tampered"
+      ],
+      "colorMutated": true,
+      "consistencyTag": "mutated-side",
+      "handedness": "left"
+    }
+  ],
+  "contentHash": "81ecc8e42612e57dd987b5fcd330fa6e87840ba8bc9a07a849db383ee287069e"
+}

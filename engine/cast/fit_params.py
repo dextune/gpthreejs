@@ -1,4 +1,8 @@
-"""CPU multi-start parameter fit against matte silhouette (stdlib)."""
+"""CPU multi-start parameter fit against matte silhouette (stdlib).
+
+FIT-101: tagged ``experimental-proxy``. Production ``run`` must not call
+``fit_root_mass``; use render-in-loop objectives in ``engine.critique.fit``.
+"""
 
 from __future__ import annotations
 
@@ -8,6 +12,9 @@ import time
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from typing import Any
+
+EXPERIMENTAL_PROXY = True
+EXPERIMENTAL_PROXY_TAG = "experimental-proxy"
 
 from engine.shared.jsonutil import dump_json, load_json
 from engine.shared.parallel import default_workers

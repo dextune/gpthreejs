@@ -11,6 +11,18 @@ from engine.critique.metrics import floors_pass
 from engine.shared.jsonutil import dump_json, load_json
 
 
+def is_policy_issued_decision(entry: dict[str, Any], decision: str | None = None) -> bool:
+    trace = entry.get("policyTrace") or {}
+    if not isinstance(trace, dict):
+        return False
+    expected = decision or entry.get("decision")
+    return (
+        trace.get("policyIssued") is True
+        and trace.get("issuer") == "review-policy"
+        and trace.get("decision") == expected
+    )
+
+
 def load_metrics_file(path: str | Path | None) -> dict:
     if not path:
         return {}
@@ -18,6 +30,10 @@ def load_metrics_file(path: str | Path | None) -> dict:
     if not p.exists():
         return {}
     return load_json(p)
+
+
+def _path_exists(path: str | Path | None) -> bool:
+    return bool(path) and Path(path).exists()
 
 
 def append_journal(
@@ -32,6 +48,7 @@ def append_journal(
     render: str | None = None,
     sheet: str | None = None,
     feature_scores: dict | None = None,
+    policy_trace: dict | None = None,
     in_place: bool = True,
 ) -> dict[str, Any]:
     if decision not in DECISIONS:
@@ -43,9 +60,18 @@ def append_journal(
 
     # vision / feature floors
     if decision == "accept":
+        if not is_policy_issued_decision(
+            {"decision": decision, "policyTrace": policy_trace or {}},
+            decision,
+        ):
+            raise SystemExit("cannot accept: decision was not issued by review-policy")
         thr = floors.get("vision", 0.7)
         if vision < thr:
             raise SystemExit(f"cannot accept: vision {vision} < {thr}")
+        if not _path_exists(render):
+            raise SystemExit("cannot accept: missing render evidence")
+        if not metrics:
+            raise SystemExit("cannot accept: missing metrics evidence")
         mode = bp.get("qualityMode", "sharp")
         if mode in ("solid", "sharp", "razor", "hybrid") and metrics and not ok_m:
             raise SystemExit(f"cannot accept: metric floors failed: {fails}")
@@ -53,7 +79,9 @@ def append_journal(
             if feat.get("layer") != layer:
                 continue
             fs = (feature_scores or {}).get(feat["id"])
-            if fs is not None and fs < feat.get("floor", 0.7):
+            if fs is None:
+                raise SystemExit(f"cannot accept: feature {feat['id']} missing render evidence")
+            if fs < feat.get("floor", 0.7):
                 raise SystemExit(
                     f"cannot accept: feature {feat['id']} score {fs} < {feat.get('floor')}"
                 )
@@ -70,6 +98,7 @@ def append_journal(
         "render": render,
         "sheet": sheet,
         "featureScores": feature_scores or {},
+        "policyTrace": policy_trace or {},
     }
     bp.setdefault("journal", []).append(entry)
     if layer in (bp.get("layers") or {}):

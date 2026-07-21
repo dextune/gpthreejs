@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subject": "single-view knight",
+  "intent": "game",
+  "modelingProfile": "stylized-character",
+  "qualityMode": "sharp",
+  "deliveryGrade": "delivery",
+  "mustHave": [
+    {
+      "id": "blue_feather_plume",
+      "weight": 1.0
+    },
+    {
+      "id": "large_sun_shield",
+      "weight": 1.0
+    },
+    {
+      "id": "broad_fantasy_sword",
+      "weight": 1.0
+    }
+  ],
+  "mustNotHave": [],
+  "targetViews": [
+    "source-34",
+    "front",
+    "left"
+  ],
+  "requiredViews": [
+    "source-34",
+    "side"
+  ]
+}

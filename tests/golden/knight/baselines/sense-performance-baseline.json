@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "reportId": "m0-sense-small-fixture-performance-baseline",
+  "status": "baseline-captured",
+  "created": "2026-07-21",
+  "purpose": "Replace the single 0.75 second Sense smoke datapoint with repeated wall-clock, traced Python allocation, machine, and backend metadata for regression decisions.",
+  "repository": {
+    "commit": "5d658c6d1d309648f3727800a969483416641410",
+    "shortCommit": "5d658c6",
+    "worktreeState": "dirty"
+  },
+  "benchmarkCommand": {
+    "summary": "Generate the fixture with tests/benchmark_sense_performance.py, patch engine.sense.matte.matte_optional_rembg to return None, run build_sense_pack(..., mode='sharp') repeatedly, measure wall runs without tracemalloc, then measure traced allocation runs separately.",
+    "reproduce": "python3 tests/benchmark_sense_performance.py --wall-runs 7 --traced-runs 3",
+    "warmupRuns": 0,
+    "wallRunCount": 7,
+    "tracedAllocationRunCount": 3,
+    "runOrder": "all wall-clock runs first, then traced allocation runs"
+  },
+  "sourceStateFingerprint": {
+    "algorithm": "sha256(sorted '<relative-path>  <file-sha256>' lines joined with '\\n' and one terminal '\\n')",
+    "value": "dfca3e5388131d88a5b61e81517888ec5cc30cddd8470007d59824c2516f2a2c",
+    "files": [
+      "engine/__init__.py",
+      "engine/contracts/__init__.py",
+      "engine/contracts/modes.py",
+      "engine/sense/__init__.py",
+      "engine/sense/depth_proxy.py",
+      "engine/sense/edges.py",
+      "engine/sense/matte.py",
+      "engine/sense/pack.py",
+      "engine/sense/palette.py",
+      "engine/sense/probe.py",
+      "engine/shared/__init__.py",
+      "engine/shared/jsonutil.py",
+      "engine/shared/pngio.py",
+      "tests/benchmark_sense_performance.py"
+    ]
+  },
+  "fixture": {
+    "kind": "generated-box-png",
+    "width": 192,
+    "height": 192,
+    "sha256": "4c43e8b72a7adccb2a995d5da94da2af136eaa7eec2d060498240f9348f645ed",
+    "foreground": "center rectangle from one quarter to three quarters of width and height",
+    "mode": "sharp"
+  },
+  "machine": {
+    "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39",
+    "pythonVersion": "3.12.3",
+    "implementation": "CPython",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "cpuCount": 16
+  },
+  "dependencies": {
+    "pillow": "12.2.0",
+    "rembg": "2.0.77",
+    "numpy": "2.4.6"
+  },
+  "backend": {
+    "matteOptionalRembg": "patched-return-none",
+    "matteMethod": "corner-distance",
+    "maps": ["depth_proxy", "edges", "matte"],
+    "notes": "Wall-clock runs are measured without tracemalloc; traced allocation runs are measured separately because tracemalloc materially changes wall-clock timing."
+  },
+  "wallClock": {
+    "unit": "seconds",
+    "runCount": 7,
+    "runs": [0.113174, 0.112591, 0.113284, 0.113038, 0.112385, 0.112368, 0.112583],
+    "min": 0.112368,
+    "median": 0.112591,
+    "max": 0.113284
+  },
+  "tracedPythonAllocations": {
+    "unit": "bytes",
+    "runCount": 3,
+    "peakBytes": [909319, 909031, 909015],
+    "min": 909015,
+    "median": 909031,
+    "max": 909319
+  },
+  "policy": {
+    "historicalSingleRunBudgetSeconds": 0.75,
+    "developerSmokeWallRunCount": 3,
+    "developerSmokeMedianMultiplier": 4.0,
+    "developerSmokeMaxMultiplier": 6.0,
+    "developerSmokeMedianCeilingSeconds": 0.450364,
+    "developerSmokeMaxCeilingSeconds": 0.679704,
+    "developerSmokeTracedAllocationCeilingBytes": 8388608,
+    "releaseGate": "deferred-to-PERF-110-after-representative-fixtures",
+    "rssGate": "deferred-to-PERF-110",
+    "regressionBasis": "Compare median and max repeated wall-clock only on matching benchmark metadata before changing release budgets."
+  }
+}

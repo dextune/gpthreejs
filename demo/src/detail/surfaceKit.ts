@@ -7,7 +7,7 @@
  *   lib.rivetRing(parent, { radius: 0.2, count: 12, material: brass });
  */
 import * as THREE from "three";
-import surfacePresetData from "../../../engine/cast/surface/presets.json";
+import surfacePresetData from "./surfacePresets";
 
 export type DetailLevel = "low" | "medium" | "high" | "ultra";
 

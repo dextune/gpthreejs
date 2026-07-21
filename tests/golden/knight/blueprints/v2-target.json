@@ -1,0 +1,2096 @@
+{
+  "schemaVersion": 2,
+  "name": "BluePlumeKnight",
+  "qualityMode": "sharp",
+  "modelingProfile": "stylized-character",
+  "intent": "game",
+  "deliveryGrade": "delivery",
+  "enforceCharacterDepth": true,
+  "handedness": "right",
+  "revision": {
+    "id": "rev-char-001",
+    "parent": null,
+    "contentHash": "ce411f99345c98e9a1daca83edf7e1f3313b3490cc6eff4a89f48c905b79a26a"
+  },
+  "proportionProfile": {
+    "headUnits": 4.2,
+    "headHeightRatio": 0.235,
+    "shoulderWidthRatio": 0.42,
+    "limbThickness": "chunky"
+  },
+  "poseProfile": {
+    "id": "source-34",
+    "mirrored": false,
+    "joints": {
+      "pelvis": {
+        "position": [
+          0.0,
+          0.9,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.15,
+          0.0
+        ]
+      },
+      "spine": {
+        "position": [
+          0.0,
+          0.18,
+          0.0
+        ],
+        "rotation": [
+          0.05,
+          0.1,
+          0.0
+        ]
+      },
+      "chest": {
+        "position": [
+          0.0,
+          0.16,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.08,
+          0.0
+        ]
+      },
+      "neck": {
+        "position": [
+          0.0,
+          0.12,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "head": {
+        "position": [
+          0.0,
+          0.14,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.12,
+          0.0
+        ]
+      },
+      "shoulder-l": {
+        "position": [
+          -0.22,
+          0.12,
+          0.02
+        ],
+        "rotation": [
+          0.1,
+          0.0,
+          0.35
+        ]
+      },
+      "elbow-l": {
+        "position": [
+          0.0,
+          -0.18,
+          0.0
+        ],
+        "rotation": [
+          0.2,
+          0.0,
+          0.1
+        ]
+      },
+      "wrist-l": {
+        "position": [
+          0.0,
+          -0.16,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "shoulder-r": {
+        "position": [
+          0.22,
+          0.12,
+          0.02
+        ],
+        "rotation": [
+          0.15,
+          0.0,
+          -0.55
+        ]
+      },
+      "elbow-r": {
+        "position": [
+          0.0,
+          -0.18,
+          0.0
+        ],
+        "rotation": [
+          0.35,
+          0.0,
+          -0.1
+        ]
+      },
+      "wrist-r": {
+        "position": [
+          0.0,
+          -0.16,
+          0.0
+        ],
+        "rotation": [
+          0.1,
+          0.0,
+          0.0
+        ]
+      },
+      "hip-l": {
+        "position": [
+          -0.1,
+          -0.05,
+          0.0
+        ],
+        "rotation": [
+          0.05,
+          0.0,
+          0.05
+        ]
+      },
+      "knee-l": {
+        "position": [
+          0.0,
+          -0.22,
+          0.0
+        ],
+        "rotation": [
+          0.15,
+          0.0,
+          0.0
+        ]
+      },
+      "ankle-l": {
+        "position": [
+          0.0,
+          -0.2,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "hip-r": {
+        "position": [
+          0.1,
+          -0.05,
+          0.0
+        ],
+        "rotation": [
+          0.1,
+          0.0,
+          -0.08
+        ]
+      },
+      "knee-r": {
+        "position": [
+          0.0,
+          -0.22,
+          0.0
+        ],
+        "rotation": [
+          0.25,
+          0.0,
+          0.0
+        ]
+      },
+      "ankle-r": {
+        "position": [
+          0.0,
+          -0.2,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    }
+  },
+  "landmarks": [
+    {
+      "id": "crown",
+      "semantic": "crown",
+      "space": "body",
+      "position": [
+        0.0,
+        1.55,
+        0.05
+      ]
+    },
+    {
+      "id": "chin",
+      "semantic": "chin",
+      "space": "body",
+      "position": [
+        0.0,
+        1.28,
+        0.08
+      ]
+    },
+    {
+      "id": "shoulder-left",
+      "semantic": "shoulder",
+      "space": "body",
+      "position": [
+        -0.22,
+        1.22,
+        0.02
+      ]
+    },
+    {
+      "id": "shoulder-right",
+      "semantic": "shoulder",
+      "space": "body",
+      "position": [
+        0.22,
+        1.22,
+        0.02
+      ]
+    },
+    {
+      "id": "sternum",
+      "semantic": "sternum",
+      "space": "body",
+      "position": [
+        0.0,
+        1.1,
+        0.06
+      ]
+    },
+    {
+      "id": "pelvis",
+      "semantic": "pelvis",
+      "space": "body",
+      "position": [
+        0.0,
+        0.9,
+        0.0
+      ]
+    },
+    {
+      "id": "elbow-left",
+      "semantic": "elbow",
+      "space": "body",
+      "position": [
+        -0.38,
+        1.0,
+        0.05
+      ]
+    },
+    {
+      "id": "elbow-right",
+      "semantic": "elbow",
+      "space": "body",
+      "position": [
+        0.4,
+        0.95,
+        0.08
+      ]
+    },
+    {
+      "id": "wrist-left",
+      "semantic": "wrist",
+      "space": "body",
+      "position": [
+        -0.42,
+        0.82,
+        0.1
+      ]
+    },
+    {
+      "id": "wrist-right",
+      "semantic": "wrist",
+      "space": "body",
+      "position": [
+        0.48,
+        0.78,
+        0.12
+      ]
+    },
+    {
+      "id": "knee-left",
+      "semantic": "knee",
+      "space": "body",
+      "position": [
+        -0.1,
+        0.48,
+        0.02
+      ]
+    },
+    {
+      "id": "knee-right",
+      "semantic": "knee",
+      "space": "body",
+      "position": [
+        0.12,
+        0.45,
+        0.04
+      ]
+    },
+    {
+      "id": "ankle-left",
+      "semantic": "ankle",
+      "space": "body",
+      "position": [
+        -0.1,
+        0.12,
+        0.04
+      ]
+    },
+    {
+      "id": "ankle-right",
+      "semantic": "ankle",
+      "space": "body",
+      "position": [
+        0.12,
+        0.1,
+        0.05
+      ]
+    },
+    {
+      "id": "shield-center",
+      "semantic": "equipment",
+      "space": "body",
+      "position": [
+        -0.5,
+        0.95,
+        0.12
+      ]
+    },
+    {
+      "id": "sword-grip",
+      "semantic": "equipment",
+      "space": "body",
+      "position": [
+        0.52,
+        0.75,
+        0.1
+      ]
+    },
+    {
+      "id": "sword-tip",
+      "semantic": "equipment",
+      "space": "body",
+      "position": [
+        0.7,
+        1.2,
+        0.05
+      ]
+    }
+  ],
+  "parts": [
+    {
+      "id": "pelvis",
+      "name": "Pelvis",
+      "role": "pelvis",
+      "joint": "pelvis",
+      "poseDriven": true,
+      "geometry": {
+        "kind": "rounded-box",
+        "size": [
+          0.28,
+          0.16,
+          0.18
+        ],
+        "radius": 0.03
+      },
+      "materialId": "mat_steel",
+      "transform": {
+        "position": [
+          0.0,
+          0.9,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.15,
+          0.0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "children": [
+        {
+          "id": "torso",
+          "name": "Torso",
+          "role": "torso",
+          "joint": "spine",
+          "geometry": {
+            "kind": "rounded-box",
+            "size": [
+              0.36,
+              0.34,
+              0.22
+            ],
+            "radius": 0.04
+          },
+          "materialId": "mat_steel",
+          "transform": {
+            "position": [
+              0.0,
+              0.18,
+              0.0
+            ],
+            "rotation": [
+              0.05,
+              0.1,
+              0.0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          "children": [
+            {
+              "id": "chest_plate",
+              "name": "Chest Plate",
+              "role": "armor",
+              "geometry": {
+                "kind": "beveled-plate",
+                "outline": [
+                  [
+                    -0.16,
+                    0.12
+                  ],
+                  [
+                    0.16,
+                    0.12
+                  ],
+                  [
+                    0.14,
+                    -0.12
+                  ],
+                  [
+                    -0.14,
+                    -0.12
+                  ]
+                ],
+                "thickness": 0.04,
+                "bevel": 0.01
+              },
+              "materialId": "mat_steel",
+              "transform": {
+                "position": [
+                  0,
+                  0.02,
+                  0.1
+                ],
+                "rotation": [
+                  0,
+                  0,
+                  0
+                ],
+                "scale": [
+                  1,
+                  1,
+                  1
+                ]
+              },
+              "children": [
+                {
+                  "id": "chest_rivets",
+                  "name": "Chest Rivets",
+                  "role": "trim",
+                  "geometry": {
+                    "kind": "instance-set",
+                    "prototype": {
+                      "kind": "sphere",
+                      "radius": 0.008
+                    },
+                    "count": 6,
+                    "distribution": "grid"
+                  },
+                  "materialId": "mat_brass",
+                  "transform": {
+                    "position": [
+                      0,
+                      0,
+                      0.025
+                    ],
+                    "rotation": [
+                      0,
+                      0,
+                      0
+                    ],
+                    "scale": [
+                      1,
+                      1,
+                      1
+                    ]
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "scarf",
+              "name": "Scarf",
+              "role": "cloth",
+              "geometry": {
+                "kind": "cloth-patch",
+                "width": 0.28,
+                "height": 0.22,
+                "drape": 0.06
+              },
+              "materialId": "mat_cloth",
+              "transform": {
+                "position": [
+                  0,
+                  0.1,
+                  0.08
+                ],
+                "rotation": [
+                  0.2,
+                  0,
+                  0
+                ],
+                "scale": [
+                  1,
+                  1,
+                  1
+                ]
+              },
+              "children": []
+            },
+            {
+              "id": "strap_cross",
+              "name": "Cross Strap",
+              "role": "strap",
+              "geometry": {
+                "kind": "tube",
+                "path": [
+                  [
+                    -0.12,
+                    0.12,
+                    0.08
+                  ],
+                  [
+                    0.12,
+                    -0.1,
+                    0.08
+                  ]
+                ],
+                "radius": 0.015
+              },
+              "materialId": "mat_leather",
+              "transform": {
+                "position": [
+                  0,
+                  0,
+                  0
+                ],
+                "rotation": [
+                  0,
+                  0,
+                  0
+                ],
+                "scale": [
+                  1,
+                  1,
+                  1
+                ]
+              },
+              "children": []
+            },
+            {
+              "id": "brooch",
+              "name": "Brooch",
+              "role": "trim",
+              "geometry": {
+                "kind": "sphere",
+                "radius": 0.03
+              },
+              "materialId": "mat_brass",
+              "transform": {
+                "position": [
+                  0,
+                  0.08,
+                  0.12
+                ],
+                "rotation": [
+                  0,
+                  0,
+                  0
+                ],
+                "scale": [
+                  1,
+                  1,
+                  1
+                ]
+              },
+              "children": []
+            },
+            {
+              "id": "cape",
+              "name": "Cape",
+              "role": "cloth",
+              "geometry": {
+                "kind": "cloth-patch",
+                "width": 0.4,
+                "height": 0.55,
+                "drape": 0.12
+              },
+              "materialId": "mat_cloth",
+              "transform": {
+                "position": [
+                  0,
+                  0.05,
+                  -0.12
+                ],
+                "rotation": [
+                  0.15,
+                  0,
+                  0
+                ],
+                "scale": [
+                  1,
+                  1,
+                  1
+                ]
+              },
+              "children": []
+            },
+            {
+              "id": "neck",
+              "name": "Neck",
+              "role": "limb",
+              "joint": "neck",
+              "geometry": {
+                "kind": "cylinder",
+                "radiusTop": 0.05,
+                "radiusBottom": 0.06,
+                "height": 0.08
+              },
+              "materialId": "mat_steel",
+              "transform": {
+                "position": [
+                  0.0,
+                  0.12,
+                  0.0
+                ],
+                "rotation": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "scale": [
+                  1,
+                  1,
+                  1
+                ]
+              },
+              "children": [
+                {
+                  "id": "head",
+                  "name": "Head",
+                  "role": "head",
+                  "joint": "head",
+                  "geometry": {
+                    "kind": "ellipsoid",
+                    "radii": [
+                      0.11,
+                      0.13,
+                      0.11
+                    ]
+                  },
+                  "materialId": "mat_steel",
+                  "transform": {
+                    "position": [
+                      0.0,
+                      0.14,
+                      0.0
+                    ],
+                    "rotation": [
+                      0.0,
+                      0.12,
+                      0.0
+                    ],
+                    "scale": [
+                      1,
+                      1,
+                      1
+                    ]
+                  },
+                  "children": [
+                    {
+                      "id": "helmet",
+                      "name": "Helmet",
+                      "role": "armor",
+                      "geometry": {
+                        "kind": "lathe",
+                        "profile": [
+                          [
+                            0.0,
+                            0.0
+                          ],
+                          [
+                            0.12,
+                            0.0
+                          ],
+                          [
+                            0.13,
+                            0.08
+                          ],
+                          [
+                            0.08,
+                            0.16
+                          ],
+                          [
+                            0.0,
+                            0.18
+                          ]
+                        ]
+                      },
+                      "materialId": "mat_steel",
+                      "transform": {
+                        "position": [
+                          0,
+                          0.02,
+                          0
+                        ],
+                        "rotation": [
+                          0,
+                          0,
+                          0
+                        ],
+                        "scale": [
+                          1,
+                          1,
+                          1
+                        ]
+                      },
+                      "children": [
+                        {
+                          "id": "plume",
+                          "name": "Blue Plume",
+                          "role": "equipment",
+                          "geometry": {
+                            "kind": "feather",
+                            "length": 0.28,
+                            "width": 0.08,
+                            "barbCount": 7
+                          },
+                          "materialId": "mat_plume",
+                          "transform": {
+                            "position": [
+                              0,
+                              0.16,
+                              -0.02
+                            ],
+                            "rotation": [
+                              -0.4,
+                              0,
+                              0
+                            ],
+                            "scale": [
+                              1,
+                              1,
+                              1
+                            ]
+                          },
+                          "children": []
+                        },
+                        {
+                          "id": "helmet_seam",
+                          "name": "Helmet Seam",
+                          "role": "trim",
+                          "geometry": {
+                            "kind": "tube",
+                            "path": [
+                              [
+                                -0.1,
+                                0.05,
+                                0.08
+                              ],
+                              [
+                                0.1,
+                                0.05,
+                                0.08
+                              ]
+                            ],
+                            "radius": 0.006
+                          },
+                          "materialId": "mat_brass",
+                          "transform": {
+                            "position": [
+                              0,
+                              0,
+                              0
+                            ],
+                            "rotation": [
+                              0,
+                              0,
+                              0
+                            ],
+                            "scale": [
+                              1,
+                              1,
+                              1
+                            ]
+                          },
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "pauldron_l",
+              "name": "Pauldron L",
+              "role": "armor",
+              "geometry": {
+                "kind": "ellipsoid",
+                "radii": [
+                  0.1,
+                  0.08,
+                  0.1
+                ]
+              },
+              "materialId": "mat_steel",
+              "transform": {
+                "position": [
+                  -0.22,
+                  0.12,
+                  0.02
+                ],
+                "rotation": [
+                  0,
+                  0,
+                  0.2
+                ],
+                "scale": [
+                  1,
+                  1,
+                  1
+                ]
+              },
+              "children": []
+            },
+            {
+              "id": "pauldron_r",
+              "name": "Pauldron R",
+              "role": "armor",
+              "geometry": {
+                "kind": "ellipsoid",
+                "radii": [
+                  0.1,
+                  0.08,
+                  0.1
+                ]
+              },
+              "materialId": "mat_steel",
+              "transform": {
+                "position": [
+                  0.22,
+                  0.12,
+                  0.02
+                ],
+                "rotation": [
+                  0,
+                  0,
+                  -0.2
+                ],
+                "scale": [
+                  1,
+                  1,
+                  1
+                ]
+              },
+              "children": []
+            },
+            {
+              "id": "upper_arm_l",
+              "name": "Upper Arm L",
+              "role": "limb",
+              "joint": "shoulder-l",
+              "geometry": {
+                "kind": "capsule",
+                "radius": 0.05,
+                "length": 0.16
+              },
+              "materialId": "mat_steel",
+              "transform": {
+                "position": [
+                  -0.22,
+                  0.12,
+                  0.02
+                ],
+                "rotation": [
+                  0.1,
+                  0.0,
+                  0.35
+                ],
+                "scale": [
+                  1,
+                  1,
+                  1
+                ]
+              },
+              "children": [
+                {
+                  "id": "forearm_l",
+                  "name": "Forearm L",
+                  "role": "limb",
+                  "joint": "elbow-l",
+                  "geometry": {
+                    "kind": "capsule",
+                    "radius": 0.045,
+                    "length": 0.14
+                  },
+                  "materialId": "mat_steel",
+                  "transform": {
+                    "position": [
+                      0.0,
+                      -0.18,
+                      0.0
+                    ],
+                    "rotation": [
+                      0.2,
+                      0.0,
+                      0.1
+                    ],
+                    "scale": [
+                      1,
+                      1,
+                      1
+                    ]
+                  },
+                  "children": [
+                    {
+                      "id": "hand_l",
+                      "name": "Hand L",
+                      "role": "limb",
+                      "joint": "wrist-l",
+                      "geometry": {
+                        "kind": "rounded-box",
+                        "size": [
+                          0.07,
+                          0.08,
+                          0.05
+                        ],
+                        "radius": 0.01
+                      },
+                      "materialId": "mat_leather",
+                      "transform": {
+                        "position": [
+                          0.0,
+                          -0.16,
+                          0.0
+                        ],
+                        "rotation": [
+                          0.0,
+                          0.0,
+                          0.0
+                        ],
+                        "scale": [
+                          1,
+                          1,
+                          1
+                        ]
+                      },
+                      "children": [
+                        {
+                          "id": "shield",
+                          "name": "Sun Shield",
+                          "role": "equipment",
+                          "geometry": {
+                            "kind": "shape-extrude",
+                            "shape": [
+                              [
+                                -0.22,
+                                0.28
+                              ],
+                              [
+                                0.22,
+                                0.28
+                              ],
+                              [
+                                0.2,
+                                -0.05
+                              ],
+                              [
+                                0.0,
+                                -0.32
+                              ],
+                              [
+                                -0.2,
+                                -0.05
+                              ]
+                            ],
+                            "depth": 0.06
+                          },
+                          "materialId": "mat_steel",
+                          "transform": {
+                            "position": [
+                              -0.12,
+                              0.05,
+                              0.08
+                            ],
+                            "rotation": [
+                              0,
+                              -0.4,
+                              0
+                            ],
+                            "scale": [
+                              1,
+                              1,
+                              1
+                            ]
+                          },
+                          "attachment": {
+                            "parentSocket": "socket-hand-l",
+                            "childSocket": "socket-shield",
+                            "contact": "grip",
+                            "maxGap": 0.45,
+                            "maxPenetration": 0.12,
+                            "required": true
+                          },
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "upper_arm_r",
+              "name": "Upper Arm R",
+              "role": "limb",
+              "joint": "shoulder-r",
+              "geometry": {
+                "kind": "capsule",
+                "radius": 0.05,
+                "length": 0.16
+              },
+              "materialId": "mat_steel",
+              "transform": {
+                "position": [
+                  0.22,
+                  0.12,
+                  0.02
+                ],
+                "rotation": [
+                  0.15,
+                  0.0,
+                  -0.55
+                ],
+                "scale": [
+                  1,
+                  1,
+                  1
+                ]
+              },
+              "children": [
+                {
+                  "id": "forearm_r",
+                  "name": "Forearm R",
+                  "role": "limb",
+                  "joint": "elbow-r",
+                  "geometry": {
+                    "kind": "capsule",
+                    "radius": 0.045,
+                    "length": 0.14
+                  },
+                  "materialId": "mat_steel",
+                  "transform": {
+                    "position": [
+                      0.0,
+                      -0.18,
+                      0.0
+                    ],
+                    "rotation": [
+                      0.35,
+                      0.0,
+                      -0.1
+                    ],
+                    "scale": [
+                      1,
+                      1,
+                      1
+                    ]
+                  },
+                  "children": [
+                    {
+                      "id": "hand_r",
+                      "name": "Hand R",
+                      "role": "limb",
+                      "joint": "wrist-r",
+                      "geometry": {
+                        "kind": "rounded-box",
+                        "size": [
+                          0.07,
+                          0.08,
+                          0.05
+                        ],
+                        "radius": 0.01
+                      },
+                      "materialId": "mat_leather",
+                      "transform": {
+                        "position": [
+                          0.0,
+                          -0.16,
+                          0.0
+                        ],
+                        "rotation": [
+                          0.1,
+                          0.0,
+                          0.0
+                        ],
+                        "scale": [
+                          1,
+                          1,
+                          1
+                        ]
+                      },
+                      "children": [
+                        {
+                          "id": "sword",
+                          "name": "Broad Sword",
+                          "role": "equipment",
+                          "geometry": {
+                            "kind": "curve-blade",
+                            "length": 0.55,
+                            "width": 0.08,
+                            "curve": 0.04
+                          },
+                          "materialId": "mat_steel",
+                          "transform": {
+                            "position": [
+                              0.05,
+                              0.2,
+                              0.02
+                            ],
+                            "rotation": [
+                              0,
+                              0,
+                              -0.4
+                            ],
+                            "scale": [
+                              1,
+                              1,
+                              1
+                            ]
+                          },
+                          "attachment": {
+                            "parentSocket": "socket-hand-r",
+                            "childSocket": "socket-sword",
+                            "contact": "grip",
+                            "maxGap": 0.45,
+                            "maxPenetration": 0.12,
+                            "required": true
+                          },
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "belt",
+          "name": "Belt",
+          "role": "strap",
+          "geometry": {
+            "kind": "torus",
+            "radius": 0.14,
+            "tube": 0.02
+          },
+          "materialId": "mat_leather",
+          "transform": {
+            "position": [
+              0,
+              0.02,
+              0
+            ],
+            "rotation": [
+              1.5708,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          "children": []
+        },
+        {
+          "id": "upper_leg_l",
+          "name": "Upper Leg L",
+          "role": "limb",
+          "joint": "hip-l",
+          "geometry": {
+            "kind": "capsule",
+            "radius": 0.06,
+            "length": 0.2
+          },
+          "materialId": "mat_steel",
+          "transform": {
+            "position": [
+              -0.1,
+              -0.05,
+              0.0
+            ],
+            "rotation": [
+              0.05,
+              0.0,
+              0.05
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          "children": [
+            {
+              "id": "lower_leg_l",
+              "name": "Lower Leg L",
+              "role": "limb",
+              "joint": "knee-l",
+              "geometry": {
+                "kind": "capsule",
+                "radius": 0.05,
+                "length": 0.18
+              },
+              "materialId": "mat_steel",
+              "transform": {
+                "position": [
+                  0.0,
+                  -0.22,
+                  0.0
+                ],
+                "rotation": [
+                  0.15,
+                  0.0,
+                  0.0
+                ],
+                "scale": [
+                  1,
+                  1,
+                  1
+                ]
+              },
+              "children": [
+                {
+                  "id": "boot_l",
+                  "name": "Boot L",
+                  "role": "armor",
+                  "joint": "ankle-l",
+                  "geometry": {
+                    "kind": "rounded-box",
+                    "size": [
+                      0.1,
+                      0.08,
+                      0.16
+                    ],
+                    "radius": 0.02
+                  },
+                  "materialId": "mat_leather",
+                  "transform": {
+                    "position": [
+                      0.0,
+                      -0.2,
+                      0.0
+                    ],
+                    "rotation": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    "scale": [
+                      1,
+                      1,
+                      1
+                    ]
+                  },
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "upper_leg_r",
+          "name": "Upper Leg R",
+          "role": "limb",
+          "joint": "hip-r",
+          "geometry": {
+            "kind": "capsule",
+            "radius": 0.06,
+            "length": 0.2
+          },
+          "materialId": "mat_steel",
+          "transform": {
+            "position": [
+              0.1,
+              -0.05,
+              0.0
+            ],
+            "rotation": [
+              0.1,
+              0.0,
+              -0.08
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          "children": [
+            {
+              "id": "lower_leg_r",
+              "name": "Lower Leg R",
+              "role": "limb",
+              "joint": "knee-r",
+              "geometry": {
+                "kind": "capsule",
+                "radius": 0.05,
+                "length": 0.18
+              },
+              "materialId": "mat_steel",
+              "transform": {
+                "position": [
+                  0.0,
+                  -0.22,
+                  0.0
+                ],
+                "rotation": [
+                  0.25,
+                  0.0,
+                  0.0
+                ],
+                "scale": [
+                  1,
+                  1,
+                  1
+                ]
+              },
+              "children": [
+                {
+                  "id": "boot_r",
+                  "name": "Boot R",
+                  "role": "armor",
+                  "joint": "ankle-r",
+                  "geometry": {
+                    "kind": "rounded-box",
+                    "size": [
+                      0.1,
+                      0.08,
+                      0.16
+                    ],
+                    "radius": 0.02
+                  },
+                  "materialId": "mat_leather",
+                  "transform": {
+                    "position": [
+                      0.0,
+                      -0.2,
+                      0.0
+                    ],
+                    "rotation": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    "scale": [
+                      1,
+                      1,
+                      1
+                    ]
+                  },
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "id": "mat_steel",
+      "name": "Steel",
+      "type": "physical",
+      "role": "steel",
+      "baseColor": "#8a939c",
+      "roughness": 0.35,
+      "metalness": 0.85,
+      "clearcoat": 0.1,
+      "aoIntensity": 0.35,
+      "channels": {
+        "baseColor": "#8a939c",
+        "roughness": 0.35,
+        "metalness": 0.85
+      }
+    },
+    {
+      "id": "mat_brass",
+      "name": "Brass",
+      "type": "physical",
+      "role": "brass",
+      "baseColor": "#b08d57",
+      "roughness": 0.4,
+      "metalness": 0.8,
+      "clearcoat": 0.05,
+      "aoIntensity": 0.3,
+      "channels": {
+        "baseColor": "#b08d57",
+        "roughness": 0.4,
+        "metalness": 0.8
+      }
+    },
+    {
+      "id": "mat_cloth",
+      "name": "Cloth",
+      "type": "physical",
+      "role": "cloth",
+      "baseColor": "#3a4a6b",
+      "roughness": 0.85,
+      "metalness": 0.0,
+      "clearcoat": 0.0,
+      "aoIntensity": 0.25,
+      "channels": {
+        "baseColor": "#3a4a6b",
+        "roughness": 0.85,
+        "metalness": 0.0
+      }
+    },
+    {
+      "id": "mat_leather",
+      "name": "Leather",
+      "type": "physical",
+      "role": "leather",
+      "baseColor": "#5a3a28",
+      "roughness": 0.75,
+      "metalness": 0.05,
+      "clearcoat": 0.0,
+      "aoIntensity": 0.3,
+      "channels": {
+        "baseColor": "#5a3a28",
+        "roughness": 0.75,
+        "metalness": 0.05
+      }
+    },
+    {
+      "id": "mat_plume",
+      "name": "Plume",
+      "type": "physical",
+      "role": "cloth",
+      "baseColor": "#2f5bd8",
+      "roughness": 0.85,
+      "metalness": 0.0,
+      "clearcoat": 0.0,
+      "aoIntensity": 0.25,
+      "channels": {
+        "baseColor": "#2f5bd8",
+        "roughness": 0.85,
+        "metalness": 0.0
+      }
+    }
+  ],
+  "handles": {
+    "socket-hand-l": {
+      "id": "socket-hand-l",
+      "partId": "hand_l",
+      "type": "socket",
+      "kind": "grip",
+      "radius": 0.04,
+      "transform": {
+        "translation": [
+          0,
+          0,
+          0.02
+        ],
+        "position": [
+          0,
+          0,
+          0.02
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    "socket-hand-r": {
+      "id": "socket-hand-r",
+      "partId": "hand_r",
+      "type": "socket",
+      "kind": "grip",
+      "radius": 0.04,
+      "transform": {
+        "translation": [
+          0,
+          0,
+          0.02
+        ],
+        "position": [
+          0,
+          0,
+          0.02
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    "socket-shield": {
+      "id": "socket-shield",
+      "partId": "shield",
+      "type": "socket",
+      "kind": "grip",
+      "radius": 0.04,
+      "transform": {
+        "translation": [
+          0,
+          0,
+          -0.02
+        ],
+        "position": [
+          0,
+          0,
+          -0.02
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    "socket-sword": {
+      "id": "socket-sword",
+      "partId": "sword",
+      "type": "socket",
+      "kind": "grip",
+      "radius": 0.035,
+      "transform": {
+        "translation": [
+          0,
+          0.05,
+          0
+        ],
+        "position": [
+          0,
+          0.05,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    "origin": {
+      "id": "origin",
+      "partId": "pelvis",
+      "type": "pivot",
+      "transform": {
+        "translation": [
+          0,
+          0,
+          0
+        ],
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    }
+  },
+  "renderProfiles": [
+    {
+      "id": "source-34",
+      "view": "source-34",
+      "camera": {
+        "position": [
+          0.9,
+          1.15,
+          2.2
+        ],
+        "lookAt": [
+          0,
+          1.0,
+          0
+        ],
+        "fov": 32
+      },
+      "purpose": "source-aligned"
+    },
+    {
+      "id": "front",
+      "view": "front",
+      "camera": {
+        "position": [
+          0,
+          1.05,
+          2.4
+        ],
+        "lookAt": [
+          0,
+          1.0,
+          0
+        ],
+        "fov": 32
+      },
+      "purpose": "turnaround"
+    },
+    {
+      "id": "left",
+      "view": "left",
+      "camera": {
+        "position": [
+          -2.4,
+          1.05,
+          0
+        ],
+        "lookAt": [
+          0,
+          1.0,
+          0
+        ],
+        "fov": 32
+      },
+      "purpose": "turnaround"
+    },
+    {
+      "id": "right",
+      "view": "right",
+      "camera": {
+        "position": [
+          2.4,
+          1.05,
+          0
+        ],
+        "lookAt": [
+          0,
+          1.0,
+          0
+        ],
+        "fov": 32
+      },
+      "purpose": "turnaround"
+    },
+    {
+      "id": "back",
+      "view": "back",
+      "camera": {
+        "position": [
+          0,
+          1.05,
+          -2.4
+        ],
+        "lookAt": [
+          0,
+          1.0,
+          0
+        ],
+        "fov": 32
+      },
+      "purpose": "turnaround"
+    },
+    {
+      "id": "top-34",
+      "view": "top-34",
+      "camera": {
+        "position": [
+          1.0,
+          2.6,
+          1.4
+        ],
+        "lookAt": [
+          0,
+          1.0,
+          0
+        ],
+        "fov": 32
+      },
+      "purpose": "inspection"
+    }
+  ],
+  "criticalFeatures": [
+    {
+      "id": "silhouette",
+      "layer": "mass",
+      "floor": 0.75,
+      "description": "Overall mass matches reference",
+      "partIds": [
+        "pelvis",
+        "torso"
+      ],
+      "targetViews": [
+        "source-34",
+        "front"
+      ]
+    },
+    {
+      "id": "helmet_identity",
+      "layer": "secondary",
+      "floor": 0.7,
+      "description": "Helmet dome readable",
+      "partIds": [
+        "helmet"
+      ],
+      "targetViews": [
+        "source-34",
+        "front"
+      ]
+    },
+    {
+      "id": "shield_identity",
+      "layer": "secondary",
+      "floor": 0.7,
+      "description": "Shield silhouette readable",
+      "partIds": [
+        "shield"
+      ],
+      "targetViews": [
+        "source-34",
+        "left"
+      ]
+    },
+    {
+      "id": "sword_identity",
+      "layer": "secondary",
+      "floor": 0.7,
+      "description": "Sword blade readable",
+      "partIds": [
+        "sword"
+      ],
+      "targetViews": [
+        "source-34",
+        "right"
+      ]
+    },
+    {
+      "id": "plume_identity",
+      "layer": "secondary",
+      "floor": 0.7,
+      "description": "Blue plume readable",
+      "partIds": [
+        "plume"
+      ],
+      "targetViews": [
+        "source-34",
+        "front"
+      ]
+    },
+    {
+      "id": "handedness",
+      "layer": "mass",
+      "floor": 0.8,
+      "description": "Shield/sword hands match source",
+      "partIds": [
+        "shield",
+        "sword",
+        "hand_l",
+        "hand_r"
+      ],
+      "targetViews": [
+        "source-34"
+      ]
+    }
+  ],
+  "ledger": {
+    "version": 1,
+    "mode": "production",
+    "modelingProfile": "stylized-character",
+    "targetMin": 8,
+    "entries": [
+      {
+        "id": "ledger-silhouette-proportion",
+        "kind": "identity",
+        "description": "Character coverage: silhouette-proportion",
+        "region": {
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "units": "normalized"
+        },
+        "scale": "meso",
+        "affects": "geometry",
+        "category": "silhouette-proportion",
+        "mapsTo": {
+          "type": "part",
+          "ref": "pelvis"
+        },
+        "confidence": 0.6,
+        "status": "draft",
+        "evidenceRefs": [
+          "character-slice",
+          "category:silhouette-proportion",
+          "part:pelvis"
+        ]
+      },
+      {
+        "id": "ledger-head-face-helmet",
+        "kind": "identity",
+        "description": "Character coverage: head-face-helmet",
+        "region": {
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "units": "normalized"
+        },
+        "scale": "meso",
+        "affects": "geometry",
+        "category": "head-face-helmet",
+        "mapsTo": {
+          "type": "part",
+          "ref": "helmet"
+        },
+        "confidence": 0.6,
+        "status": "draft",
+        "evidenceRefs": [
+          "character-slice",
+          "category:head-face-helmet",
+          "part:helmet"
+        ]
+      },
+      {
+        "id": "ledger-torso-layering",
+        "kind": "identity",
+        "description": "Character coverage: torso-layering",
+        "region": {
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "units": "normalized"
+        },
+        "scale": "meso",
+        "affects": "geometry",
+        "category": "torso-layering",
+        "mapsTo": {
+          "type": "part",
+          "ref": "torso"
+        },
+        "confidence": 0.6,
+        "status": "draft",
+        "evidenceRefs": [
+          "character-slice",
+          "category:torso-layering",
+          "part:torso"
+        ]
+      },
+      {
+        "id": "ledger-limb-asymmetry",
+        "kind": "identity",
+        "description": "Character coverage: limb-asymmetry",
+        "region": {
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "units": "normalized"
+        },
+        "scale": "meso",
+        "affects": "geometry",
+        "category": "limb-asymmetry",
+        "mapsTo": {
+          "type": "part",
+          "ref": "upper_arm_l"
+        },
+        "confidence": 0.6,
+        "status": "draft",
+        "evidenceRefs": [
+          "character-slice",
+          "category:limb-asymmetry",
+          "part:upper_arm_l"
+        ]
+      },
+      {
+        "id": "ledger-held-worn-equipment",
+        "kind": "identity",
+        "description": "Character coverage: held-worn-equipment",
+        "region": {
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "units": "normalized"
+        },
+        "scale": "meso",
+        "affects": "geometry",
+        "category": "held-worn-equipment",
+        "mapsTo": {
+          "type": "part",
+          "ref": "shield"
+        },
+        "confidence": 0.6,
+        "status": "draft",
+        "evidenceRefs": [
+          "character-slice",
+          "category:held-worn-equipment",
+          "part:shield"
+        ]
+      },
+      {
+        "id": "ledger-lower-body-feet",
+        "kind": "identity",
+        "description": "Character coverage: lower-body-feet",
+        "region": {
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "units": "normalized"
+        },
+        "scale": "meso",
+        "affects": "geometry",
+        "category": "lower-body-feet",
+        "mapsTo": {
+          "type": "part",
+          "ref": "boot_l"
+        },
+        "confidence": 0.6,
+        "status": "draft",
+        "evidenceRefs": [
+          "character-slice",
+          "category:lower-body-feet",
+          "part:boot_l"
+        ]
+      },
+      {
+        "id": "ledger-material-roles",
+        "kind": "identity",
+        "description": "Character coverage: material-roles",
+        "region": {
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "units": "normalized"
+        },
+        "scale": "meso",
+        "affects": "geometry",
+        "category": "material-roles",
+        "mapsTo": {
+          "type": "part",
+          "ref": "torso"
+        },
+        "confidence": 0.6,
+        "status": "draft",
+        "evidenceRefs": [
+          "character-slice",
+          "category:material-roles",
+          "part:torso"
+        ]
+      },
+      {
+        "id": "ledger-attachment-relationships",
+        "kind": "identity",
+        "description": "Character coverage: attachment-relationships",
+        "region": {
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "units": "normalized"
+        },
+        "scale": "meso",
+        "affects": "geometry",
+        "category": "attachment-relationships",
+        "mapsTo": {
+          "type": "part",
+          "ref": "sword"
+        },
+        "confidence": 0.6,
+        "status": "draft",
+        "evidenceRefs": [
+          "character-slice",
+          "category:attachment-relationships",
+          "part:sword"
+        ]
+      }
+    ],
+    "agentAction": "continue"
+  },
+  "bodySource": "procedural",
+  "domain": "character",
+  "complexity": "complex",
+  "environment": {
+    "id": "neutral-studio",
+    "exposure": 1.0,
+    "ambientIntensity": 0.45,
+    "keyIntensity": 1.1,
+    "fillIntensity": 0.4,
+    "rimIntensity": 0.25
+  },
+  "polishApplied": true,
+  "seed": 42
+}

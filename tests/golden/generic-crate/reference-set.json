@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "references": [
+    {
+      "id": "main",
+      "path": "references/main.png",
+      "assetHash": "850d646376e108534d8369c43864ea13eb8bae40c17a413403dc36f0b9049aee",
+      "declaredView": "front",
+      "detectedView": "front",
+      "evidenceClass": "observed",
+      "visibleFeatures": [
+        "crate_mass"
+      ]
+    }
+  ],
+  "contentHash": "40d2f7f061fea82478396bf3a0f1ff6db1cdecfd7046e6ed2d8b00497c984739"
+}

@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "name": "BluePlumeKnight",
+  "blueprintPath": "blueprints/v2-target.json",
+  "strict": true
+}

@@ -38,6 +38,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     p.add_argument("--metrics")
     p.add_argument("--render")
     p.add_argument("--sheet")
+    p.add_argument("--policy-trace")
     p.add_argument("--in-place", action="store_true")
     bind(p, run_journal)
 
@@ -73,6 +74,7 @@ def run_metrics(args: argparse.Namespace) -> int:
 
 def run_journal(args: argparse.Namespace) -> int:
     from engine.critique.journal import append_journal
+    from engine.shared.jsonutil import load_json
 
     print_json(
         append_journal(
@@ -85,6 +87,7 @@ def run_journal(args: argparse.Namespace) -> int:
             metrics_path=args.metrics,
             render=args.render,
             sheet=args.sheet,
+            policy_trace=load_json(args.policy_trace) if args.policy_trace else None,
             in_place=args.in_place,
         )
     )

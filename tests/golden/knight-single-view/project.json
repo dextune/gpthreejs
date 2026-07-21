@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "name": "SingleViewKnight",
+  "strict": true,
+  "deliveryGrade": "delivery",
+  "useCharacterSlice": true,
+  "requestPath": "request-spec.json",
+  "referenceSetPath": "reference-set.json"
+}

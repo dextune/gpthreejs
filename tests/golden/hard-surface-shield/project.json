@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "name": "sunshieldprop",
+  "strict": true,
+  "deliveryGrade": "standard",
+  "useCharacterSlice": true,
+  "requestPath": "request-spec.json",
+  "referenceSetPath": "reference-set.json"
+}

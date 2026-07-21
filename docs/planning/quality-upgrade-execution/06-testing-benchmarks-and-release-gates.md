@@ -4,9 +4,9 @@
 
 품질을 주관적 screenshot 감상에만 맡기지 않고, 계약·실제 브라우저 렌더·feature evidence·사람/vision review를 계층화한다. 테스트는 구현 후 추가하는 부록이 아니라 각 task의 완료 조건이다.
 
-## 현재 기준선
+## Pre-M0 기준선 snapshot
 
-현재 테스트 자산:
+계획 작성 시점의 테스트 자산:
 
 - [`tests/test_engine.py`](../../../tests/test_engine.py): sense → blueprint → cast와 layer sync smoke
 - [`tests/test_sufficiency.py`](../../../tests/test_sufficiency.py): missing/tiny/single-view/TODO/user message
@@ -14,7 +14,7 @@
 - [`tests/test_refactoring_contracts.py`](../../../tests/test_refactoring_contracts.py): CLI dry-run, deterministic seed, factory reuse, worker parity, timing/memory smoke
 - [`demo/package.json`](../../../demo/package.json): Vite build만 존재
 
-현재 Python 회귀 테스트는 유지한다. 부족한 부분은 Blueprint v2, canonical browser render, fail-closed policy, portability, visual benchmark다.
+기존 Python 회귀 테스트는 유지한다. 부족한 부분은 Blueprint v2, canonical browser render, fail-closed policy, portability, visual benchmark다.
 
 2026-07-21 로컬 기준선 실행 결과:
 
@@ -22,6 +22,11 @@
 - `npm --prefix demo run build`: `vite`를 찾지 못해 시작하지 못했다. 문서 검증 단계에서는 dependency install을 수행하지 않았다.
 
 성능 실패는 threshold를 즉시 느슨하게 바꾸지 않는다. machine/backend metadata와 반복 측정을 먼저 추가한 뒤 release budget과 developer smoke budget을 분리한다.
+
+현재 M0 tracker 상태는 [`tasklist.md`](./tasklist.md)를 기준으로 한다.
+계획 snapshot 이후 strict demo typecheck, browser runtime smoke,
+deterministic capture smoke, v0 Gate A-E failure report, repeated Sense
+performance metadata가 추가됐다.
 
 ## 테스트 계층
 
@@ -227,25 +232,40 @@ OpenCV, NumPy/BLAS, ONNX Runtime, Python process를 각각 최대치로 두지 �
 - quality mode별 max render count 준수
 - timeout과 cancellation 동작
 
+M0 developer smoke는 release gate가 아니다. `M0-010`은 matching
+machine/python/dependency metadata이고 `tracemalloc`이 사전에 켜져 있지 않을
+때만 small Sense fixture의 live median/max wall-clock ceiling을 적용한다. Traced
+Python allocation ceiling은 별도 측정으로 격리해 환경 metadata와 무관하게 smoke
+상한으로 유지한다. Metadata가 다르거나 external tracing이 켜져 있으면
+구조·backend·artifact와 allocation 검증은 유지하되 numeric timing 판단은
+`PERF-110`의 representative benchmark로 넘긴다.
+
 ## 실행 명령
 
-현재 기준선:
+Pre-M0 기준선 snapshot:
 
 ```bash
 python -m unittest discover -s tests -v
-npm --prefix demo ci
+npm --prefix demo ci --include=dev
 npm --prefix demo run build
 ```
 
-M0 이후 목표:
+현재 M0 verification surface:
 
 ```bash
 python -m unittest discover -s tests -v
 python -m engine validate tests/golden/knight/blueprints/v0-shallow.json --strict
+npm --prefix demo ci --include=dev
+npm --prefix demo run provision:browser
+npm --prefix demo run preflight
 npm --prefix demo run typecheck
 npm --prefix demo run build
 npm --prefix demo run test:runtime
-python -m engine run tests/golden/knight/project.json --max-iterations 1
+npm --prefix demo run capture:smoke
+npm --prefix demo run check
+npm --prefix demo run test:preflight
+npm --prefix demo run verify:clean-install
+python3 tests/benchmark_sense_performance.py --wall-runs 7 --traced-runs 3
 ```
 
 릴리스 candidate:

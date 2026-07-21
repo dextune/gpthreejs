@@ -1,0 +1,7 @@
+{
+  "verdict": "reject",
+  "expectCodes": [
+    "CHAR_NO_SIDE",
+    "DELIVERY_VIEW_INSUFFICIENT"
+  ]
+}

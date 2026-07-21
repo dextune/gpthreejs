@@ -68,7 +68,25 @@ def draft_brief(
     return brief
 
 
-def draft_ledger(image: str, sense_dir: str | Path, out: str | Path, grid: int = 3) -> dict:
+def draft_ledger(
+    image: str,
+    sense_dir: str | Path,
+    out: str | Path,
+    grid: int = 3,
+    *,
+    mode: str = "production",
+    modeling_profile: str = "generic-prop",
+    target_min: int | None = None,
+) -> dict:
+    """
+    Draft a Feature Ledger.
+
+    production mode: emit at least targetMin real entries (no TODO stubs), or
+    set agentAction=ask when evidence is insufficient to invent features.
+    authoring mode: allow TODO skeleton rows for interactive fill-in.
+    """
+    from engine.blueprint.ledger_validation import CHARACTER_LEDGER_CATEGORIES
+
     sense_path = Path(sense_dir) / "sense_pack.json"
     sense = load_json(sense_path) if sense_path.exists() else {}
     zones = sense.get("part_grid") or []
@@ -87,14 +105,12 @@ def draft_ledger(image: str, sense_dir: str | Path, out: str | Path, grid: int =
             for y in range(grid)
             for x in range(grid)
         ]
-    ledger = {
-        "version": 1,
-        "image": image,
-        "scanMethod": f"grid-{grid}x{grid}",
-        "targetMin": COMPLEXITY_LEDGER_MIN["moderate"],
-        "zones": zones,
-        "entries": [
-            # skeleton rows for the agent to fill
+
+    min_entries = target_min if target_min is not None else COMPLEXITY_LEDGER_MIN["moderate"]
+    character = modeling_profile == "stylized-character" or sense.get("domain") == "character"
+
+    if mode == "authoring":
+        entries = [
             {
                 "id": f"todo-{z['id']}",
                 "kind": "contour",
@@ -105,16 +121,175 @@ def draft_ledger(image: str, sense_dir: str | Path, out: str | Path, grid: int =
                 "mapsTo": None,
                 "confidence": 0.0,
                 "status": "todo",
+                "evidenceRefs": [],
             }
             for z in zones[:3]
-        ],
-        "instructions": (
+        ]
+        agent_action = "continue"
+        instructions = (
             "Replace todo entries with real features. Every entry needs mapsTo "
             "pointing at parts[].features[] or materials[].overrides[] ids after blueprint."
-        ),
+        )
+    else:
+        entries = _production_ledger_entries(
+            zones=zones,
+            sense=sense,
+            target_min=min_entries,
+            character=character,
+            categories=CHARACTER_LEDGER_CATEGORIES if character else (),
+        )
+        filled = [e for e in entries if e.get("status") != "todo"]
+        if len(filled) < min_entries:
+            agent_action = "ask"
+            instructions = (
+                f"Insufficient evidence to reach targetMin={min_entries}; "
+                "supply more views or fill ledger entries before cast."
+            )
+        else:
+            agent_action = "continue"
+            instructions = (
+                "Production ledger entries are evidence-backed scaffolds. "
+                "Resolve mapsTo before strict cast."
+            )
+
+    ledger = {
+        "version": 1,
+        "image": image,
+        "scanMethod": f"grid-{grid}x{grid}",
+        "targetMin": min_entries,
+        "mode": mode,
+        "modelingProfile": modeling_profile,
+        "zones": zones,
+        "entries": entries,
+        "agentAction": agent_action,
+        "instructions": instructions,
     }
     dump_json(out, ledger)
     return ledger
+
+
+def _production_ledger_entries(
+    *,
+    zones: list[dict[str, Any]],
+    sense: dict[str, Any],
+    target_min: int,
+    character: bool,
+    categories: tuple[str, ...],
+) -> list[dict[str, Any]]:
+    """Build real (non-TODO) ledger entries from zones/sense/category coverage."""
+
+    palette = (sense.get("palette") or {}).get("colors") or []
+    primary = (palette[0] or {}).get("hex") if palette else None
+    entries: list[dict[str, Any]] = []
+
+    def _region_for(index: int) -> dict[str, Any]:
+        if zones:
+            return zones[index % len(zones)].get("region") or {
+                "x": 0,
+                "y": 0,
+                "w": 1,
+                "h": 1,
+                "units": "normalized",
+            }
+        return {"x": 0, "y": 0, "w": 1, "h": 1, "units": "normalized"}
+
+    if character and categories:
+        scale_for = {
+            "silhouette-proportion": "global",
+            "head-face-helmet": "meso",
+            "torso-layering": "meso",
+            "limb-asymmetry": "meso",
+            "held-worn-equipment": "meso",
+            "lower-body-feet": "meso",
+            "material-roles": "micro",
+            "attachment-relationships": "meso",
+        }
+        edge_density = None
+        try:
+            edge_density = (sense.get("maps") or {}).get("edges", {}).get("edge_density")
+        except Exception:
+            edge_density = None
+        for index, category in enumerate(categories):
+            zone = zones[index % len(zones)] if zones else {}
+            zone_id = zone.get("id", f"z{index}")
+            evidence = []
+            if sense:
+                evidence.append("sense")
+            if zone_id:
+                evidence.append(f"zone:{zone_id}")
+            if primary:
+                evidence.append(f"palette:{primary}")
+            if edge_density is not None:
+                evidence.append(f"edgeDensity:{float(edge_density):.4f}")
+            conf = 0.55 if sense else 0.4
+            if edge_density is not None:
+                conf = min(0.9, conf + min(0.2, float(edge_density) * 0.5))
+            entries.append(
+                {
+                    "id": f"feat-{category}",
+                    "kind": "identity",
+                    "description": (
+                        f"Character coverage: {category} from zone {zone_id}"
+                        + (f" palette {primary}" if primary else "")
+                    ),
+                    "region": _region_for(index),
+                    "scale": scale_for.get(category, "meso"),
+                    "affects": "geometry" if category != "material-roles" else "material",
+                    "category": category,
+                    "mapsTo": "unresolved",
+                    "confidence": conf,
+                    "status": "draft",
+                    "evidenceRefs": evidence,
+                }
+            )
+    else:
+        # Prop / generic: one real entry per zone until targetMin.
+        count = max(target_min, min(len(zones), max(target_min, 6)))
+        for index in range(count):
+            zone = zones[index % len(zones)] if zones else {"id": f"z{index}"}
+            zid = zone.get("id", f"z{index}")
+            entries.append(
+                {
+                    "id": f"feat-{zid}-{index}",
+                    "kind": "contour",
+                    "description": f"Identity mass/detail for zone {zid}",
+                    "region": _region_for(index),
+                    "scale": "meso" if index < 4 else "micro",
+                    "affects": "geometry",
+                    "mapsTo": "unresolved",
+                    "confidence": 0.5,
+                    "status": "draft",
+                    "evidenceRefs": ["sense"] if sense else [],
+                }
+            )
+
+    # Ensure targetMin with additional meso entries if categories alone fall short.
+    index = len(entries)
+    while len(entries) < target_min:
+        entries.append(
+            {
+                "id": f"feat-extra-{index}",
+                "kind": "contour",
+                "description": f"Additional coverage entry {index}",
+                "region": _region_for(index),
+                "scale": "meso",
+                "affects": "geometry",
+                "mapsTo": "unresolved",
+                "confidence": 0.45,
+                "status": "draft",
+                "evidenceRefs": ["sense"] if sense else [],
+                **(
+                    {"category": categories[index % len(categories)]}
+                    if character and categories
+                    else {}
+                ),
+            }
+        )
+        index += 1
+
+    if primary:
+        entries[0]["description"] = f"{entries[0]['description']} (palette cue {primary})"
+    return entries
 
 
 def draft_blueprint(

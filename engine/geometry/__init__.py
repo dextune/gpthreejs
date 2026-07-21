@@ -1,0 +1,2 @@
+"""Geometry contracts and helpers."""
+

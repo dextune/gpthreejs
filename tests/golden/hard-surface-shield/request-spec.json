@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "subject": "sun shield prop",
+  "intent": "game",
+  "modelingProfile": "hard-surface-hero",
+  "qualityMode": "sharp",
+  "deliveryGrade": "standard",
+  "mustHave": [
+    {
+      "id": "sun_emblem",
+      "weight": 1.0
+    }
+  ],
+  "mustNotHave": [],
+  "targetViews": [
+    "front"
+  ],
+  "requiredViews": [
+    "front"
+  ]
+}

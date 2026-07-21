@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "fixture": "knight-quality-baseline",
+  "coveragePolicy": "Each observed failure must map to at least one planned task and one structured test, eval, artifact, preflight, report, scan, or CI evidence ID before the task can be closed.",
+  "observations": [
+    {"id": "OBS-01", "tasks": ["REF-110", "REF-111"], "evidenceIds": ["test:matte-confidence-report", "artifact:normalization-transform-manifest"]},
+    {"id": "OBS-02", "tasks": ["REF-120"], "evidenceIds": ["test:reference-set-view-coverage"]},
+    {"id": "OBS-03", "tasks": ["REF-130", "REF-131"], "evidenceIds": ["test:ledger-target-min-category-coverage"]},
+    {"id": "OBS-04", "tasks": ["BP-111", "CHAR-101"], "evidenceIds": ["fixture:v0-shallow-blueprint", "report:gate-a-b-failure"]},
+    {"id": "OBS-05", "tasks": ["BP-111"], "evidenceIds": ["test:strict-v2-character-depth-rejection"]},
+    {"id": "OBS-06", "tasks": ["GEO-101", "GEO-102"], "evidenceIds": ["test:unknown-geometry-hard-error"]},
+    {"id": "OBS-07", "tasks": ["DX-101", "DX-110"], "evidenceIds": ["preflight:typescript-typecheck", "test:browser-pageerror-smoke"]},
+    {"id": "OBS-08", "tasks": ["DX-201", "DX-210"], "evidenceIds": ["scan:no-repository-relative-import", "test:portable-bundle-consumer"]},
+    {"id": "OBS-09", "tasks": ["MAT-101", "MAT-110"], "evidenceIds": ["report:neutral-material-readability"]},
+    {"id": "OBS-10", "tasks": ["PERF-110", "PERF-120"], "evidenceIds": ["report:bundle-runtime-profile"]},
+    {"id": "OBS-11", "tasks": ["ATT-101", "ATT-110"], "evidenceIds": ["test:socket-contact-gap"]},
+    {"id": "OBS-12", "tasks": ["DX-210", "DX-220"], "evidenceIds": ["artifact:portable-ts-bundle", "test:wheel-install-smoke"]},
+    {"id": "OBS-13", "tasks": ["DX-301"], "evidenceIds": ["test:utf8-roundtrip"]},
+    {"id": "OBS-14", "tasks": ["FIT-101", "FIT-110"], "evidenceIds": ["test:production-run-excludes-proxy-fit", "test:render-loop-objective"]},
+    {"id": "OBS-15", "tasks": ["REV-110", "REV-120"], "evidenceIds": ["test:missing-evidence-fail-closed"]},
+    {"id": "OBS-16", "tasks": ["M0-010", "PERF-110"], "evidenceIds": ["report:machine-backend-metadata", "report:repeated-baseline"]},
+    {"id": "OBS-17", "tasks": ["M0-011", "CI-101"], "evidenceIds": ["preflight:demo-dependency", "ci:clean-checkout"]}
+  ]
+}

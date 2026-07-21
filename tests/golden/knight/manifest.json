@@ -1,0 +1,118 @@
+{
+  "version": 1,
+  "fixtureId": "knight-quality-baseline",
+  "status": "m0-baseline",
+  "created": "2026-07-21",
+  "purpose": "Preserve the observed shallow knight failure as a regression fixture before Blueprint v2 and render review gates are implemented.",
+  "sourcePolicy": {
+    "binaryPolicy": "Only tracked repository files are required by this manifest. Ignored work artifacts are recorded in the baseline report as prior local evidence, not as clean-checkout test inputs.",
+    "licenseStatus": "repo-local-sample-provenance-not-yet-audited",
+    "provenanceStatus": "known-repository-paths-with-sha256"
+  },
+  "references": [
+    {
+      "id": "knight-hero-34",
+      "path": "samples/knight/knight_01_hero_34.png",
+      "role": "source-3-4",
+      "sourceClass": "repo-local-sample",
+      "evidenceClass": "repo-local-sample",
+      "sha256": "21a3e994e1d4371eee7e35ef15c39effb3332c91509e1c86fdf5a40c16f30a06",
+      "bytes": 485415,
+      "width": 768,
+      "height": 1024,
+      "visibleFeatures": [
+        "helmet",
+        "plume",
+        "shield",
+        "sword",
+        "armor",
+        "cape"
+      ]
+    },
+    {
+      "id": "knight-front-ortho",
+      "path": "samples/knight/knight_02_front_ortho.png",
+      "role": "front-turnaround",
+      "sourceClass": "repo-local-sample",
+      "evidenceClass": "repo-local-sample",
+      "sha256": "d07f35c0e9df1228afdc2c0baa73efbbab44abb6e0e72c202a5317e22944f051",
+      "bytes": 622139,
+      "width": 768,
+      "height": 1024,
+      "visibleFeatures": [
+        "front-mass",
+        "helmet",
+        "shield",
+        "sword"
+      ]
+    },
+    {
+      "id": "knight-side-ortho",
+      "path": "samples/knight/knight_03_side_ortho.png",
+      "role": "side-turnaround",
+      "sourceClass": "repo-local-sample",
+      "evidenceClass": "repo-local-sample",
+      "sha256": "43d5987a9f3a92dbced4067b749d24ffb9cf28954f2ea5024b869b515804917a",
+      "bytes": 310565,
+      "width": 768,
+      "height": 1024,
+      "visibleFeatures": [
+        "side-volume",
+        "helmet-depth",
+        "cape-depth"
+      ]
+    },
+    {
+      "id": "knight-back-ortho",
+      "path": "samples/knight/knight_04_back_ortho.png",
+      "role": "back-turnaround",
+      "sourceClass": "repo-local-sample",
+      "evidenceClass": "repo-local-sample",
+      "sha256": "63a227785d5e7d5c391eab26309cc11840f74246232bc7ae3e75c1136469dd56",
+      "bytes": 502226,
+      "width": 768,
+      "height": 1024,
+      "visibleFeatures": [
+        "back-silhouette",
+        "cape",
+        "plume"
+      ]
+    },
+    {
+      "id": "knight-bust-detail",
+      "path": "samples/knight/knight_05_bust_detail.png",
+      "role": "detail-reference",
+      "sourceClass": "repo-local-sample",
+      "evidenceClass": "repo-local-sample",
+      "sha256": "5c0a7ae4c5857e5ba56bf37288a51a4da84d67c3a9976820e7afc8363ea21121",
+      "bytes": 957019,
+      "width": 1024,
+      "height": 1024,
+      "visibleFeatures": [
+        "helmet-detail",
+        "visor",
+        "plume"
+      ]
+    }
+  ],
+  "trackedArtifacts": [
+    {
+      "id": "generated-factory-current",
+      "path": "demo/src/createKnightForm.ts",
+      "kind": "generated-threejs-factory",
+      "sourceClass": "tracked-generated-demo-source",
+      "evidenceClass": "tracked-current-output",
+      "sha256": "5c1133aaec92ffcfe1713dcf30a4146e1a4cbe0d6a299189ea94cbbd8b5a8bc1"
+    }
+  ],
+  "baselineFixtures": {
+    "v0ShallowBlueprint": "tests/golden/knight/blueprints/v0-shallow.json",
+    "expectedV2Failures": "tests/golden/knight/expected-contracts/v2-character-depth-failures.json",
+    "obsTraceability": "tests/golden/knight/reports/obs-traceability.json",
+    "baselineReport": "tests/golden/knight/baselines/m0-baseline-report.json"
+  },
+  "knownGaps": [
+    "Browser console log and canonical beauty/alpha render evidence are inventoried as missing until DX-110 and RND-101 create reproducible harnesses.",
+    "Repository-local sample image license and provenance need explicit audit before fixture publication outside this repository."
+  ]
+}

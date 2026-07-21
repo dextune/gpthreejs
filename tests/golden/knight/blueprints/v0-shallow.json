@@ -1,0 +1,277 @@
+{
+  "version": 1,
+  "name": "KnightV0Shallow",
+  "bodySource": "procedural",
+  "qualityMode": "sharp",
+  "domain": "character",
+  "complexity": "complex",
+  "image": "samples/knight/knight_01_hero_34.png",
+  "fidelityPact": {
+    "targetFidelity": 0.82,
+    "ledgerMin": 10
+  },
+  "materials": [
+    {
+      "id": "mat_steel",
+      "kind": "metal",
+      "baseColor": "#9099a3",
+      "roughness": 0.34,
+      "metalness": 0.88,
+      "overrides": [
+        {
+          "id": "ov_steel_gloss",
+          "kind": "roughness",
+          "value": 0.18
+        }
+      ]
+    },
+    {
+      "id": "mat_blue",
+      "kind": "paint",
+      "baseColor": "#286fca",
+      "roughness": 0.5,
+      "metalness": 0.1,
+      "overrides": [
+        {
+          "id": "ov_blue_shield",
+          "kind": "color",
+          "value": "#286fca"
+        }
+      ]
+    },
+    {
+      "id": "mat_brass",
+      "kind": "metal",
+      "baseColor": "#b98932",
+      "roughness": 0.28,
+      "metalness": 0.8,
+      "overrides": [
+        {
+          "id": "ov_brass",
+          "kind": "color",
+          "value": "#b98932"
+        }
+      ]
+    }
+  ],
+  "parts": [
+    {
+      "id": "root_mass",
+      "name": "single box knight mass",
+      "role": "body",
+      "geometry": {
+        "kind": "box",
+        "size": [
+          1.0,
+          1.85,
+          0.38
+        ]
+      },
+      "materialId": "mat_steel",
+      "transform": {
+        "position": [
+          0,
+          0.9,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "features": [
+        {
+          "id": "feat_visor",
+          "kind": "line",
+          "description": "visor represented as a shallow painted line"
+        },
+        {
+          "id": "feat_plate_bevel",
+          "kind": "bevel",
+          "description": "generic bevel cue on the single root box"
+        },
+        {
+          "id": "feat_cape",
+          "kind": "back-contour",
+          "description": "cape noted in metadata but not separated into geometry"
+        },
+        {
+          "id": "feat_sword_guard",
+          "kind": "line",
+          "description": "sword cue without socket/contact"
+        },
+        {
+          "id": "feat_plume",
+          "kind": "silhouette",
+          "description": "plume cue without helmet crest attachment"
+        },
+        {
+          "id": "feat_shield_rim",
+          "kind": "line",
+          "description": "shield cue without convex shield part"
+        }
+      ],
+      "children": [
+        {
+          "id": "accent_trim",
+          "name": "painted shield and weapon accents",
+          "role": "accent",
+          "geometry": {
+            "kind": "box",
+            "size": [
+              0.76,
+              0.06,
+              0.03
+            ]
+          },
+          "materialId": "mat_blue",
+          "transform": {
+            "position": [
+              0,
+              0.28,
+              0.22
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          "attachment": {
+            "parent": "root_mass"
+          },
+          "features": []
+        }
+      ]
+    }
+  ],
+  "layers": {
+    "mass": {
+      "status": "open"
+    },
+    "skeleton": {
+      "status": "open"
+    },
+    "contour": {
+      "status": "open"
+    },
+    "proportion": {
+      "status": "open"
+    },
+    "landmarks": {
+      "status": "open"
+    },
+    "skin": {
+      "status": "open"
+    },
+    "light": {
+      "status": "open"
+    },
+    "handle": {
+      "status": "open"
+    },
+    "polish": {
+      "status": "open"
+    }
+  },
+  "ledger": {
+    "version": 1,
+    "image": "samples/knight/knight_01_hero_34.png",
+    "scanMethod": "m0-hand-authored-regression",
+    "targetMin": 10,
+    "entries": [
+      {
+        "id": "visor-slit",
+        "status": "filled",
+        "mapsTo": {
+          "type": "feature",
+          "ref": "feat_visor"
+        }
+      },
+      {
+        "id": "plate-bevel",
+        "status": "filled",
+        "mapsTo": {
+          "type": "feature",
+          "ref": "feat_plate_bevel"
+        }
+      },
+      {
+        "id": "cape-fold",
+        "status": "filled",
+        "mapsTo": {
+          "type": "feature",
+          "ref": "feat_cape"
+        }
+      },
+      {
+        "id": "sword-guard",
+        "status": "filled",
+        "mapsTo": {
+          "type": "feature",
+          "ref": "feat_sword_guard"
+        }
+      },
+      {
+        "id": "plume",
+        "status": "filled",
+        "mapsTo": {
+          "type": "feature",
+          "ref": "feat_plume"
+        }
+      },
+      {
+        "id": "shield-rim",
+        "status": "filled",
+        "mapsTo": {
+          "type": "feature",
+          "ref": "feat_shield_rim"
+        }
+      },
+      {
+        "id": "metal-gloss",
+        "status": "filled",
+        "mapsTo": {
+          "type": "override",
+          "ref": "ov_steel_gloss"
+        }
+      },
+      {
+        "id": "brass-trim",
+        "status": "filled",
+        "mapsTo": {
+          "type": "override",
+          "ref": "ov_brass"
+        }
+      },
+      {
+        "id": "blue-shield",
+        "status": "filled",
+        "mapsTo": {
+          "type": "override",
+          "ref": "ov_blue_shield"
+        }
+      },
+      {
+        "id": "single-root-body",
+        "status": "filled",
+        "mapsTo": {
+          "type": "feature",
+          "ref": "feat_plate_bevel"
+        }
+      }
+    ]
+  },
+  "journal": []
+}
