@@ -57,6 +57,15 @@ Each issue includes `code`, `message`, `remedy`, and optional `evidence`. The
 runtime may localize `message` or `userMessage`, but this playbook remains in
 English.
 
+## Reference Prep handoff
+
+On `abort` / `ask`, the engine attaches a **GenerationBrief** (inline and, when
+`--out` is set, `generation-brief.json` next to the report). User messages include
+a capture/gen checklist (resolution, transparent or solid neutral background,
+front/side views, pose). Do not cast until prep + re-sufficiency succeed.
+
+Full prep loop: `playbook/reference_prep.md`.
+
 ## Agent routine
 
 1. Run `sufficiency` immediately after image intake, then rerun after sense when possible.  

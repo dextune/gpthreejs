@@ -4,6 +4,8 @@
 
 단일 이미지의 기술 품질만 검사하는 현재 gate를, 여러 이미지가 같은 대상을 일관되게 설명하는지 확인하는 `ReferenceSet` gate로 확장한다. 이미지가 부족할 때는 수동 padding 같은 우회 없이 `normalize`, `generate_more`, `ask`, `abort` 중 하나를 명시적으로 선택한다.
 
+> **후속 갭 (2026-07-21):** `generate_more` / REF-150 port 이후에도 **GenerationBrief(투명 배경·해상도·턴어라운드 스펙)와 텍스트 전용 intake** 가 제품 루프에 묶이지 않았다. 실행 항목은 [intake-and-reference-prep-upgrade.md](../intake-and-reference-prep-upgrade.md) 를 본다.
+
 ## 현재 재사용 자산
 
 - [`engine/sense/pack.py`](../../../engine/sense/pack.py)의 Sense Pack orchestration

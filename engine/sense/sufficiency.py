@@ -23,6 +23,7 @@ from engine.sense.sufficiency_policy import (
     sufficiency_score,
     verdict_and_action,
 )
+from engine.sense.sufficiency_prep import maybe_attach_generation_brief
 
 
 def _load_optional(path: str | Path | None) -> dict[str, Any] | None:
@@ -135,6 +136,14 @@ def assess_sufficiency(
         "userMessage": user_message(verdict, issues, domain=str(dom), image=str(image)),
         "nextSteps": next_steps(action, issues),
     }
+
+    maybe_attach_generation_brief(
+        report,
+        domain=str(dom),
+        intent=str(intent_v),
+        image=image,
+        out=out,
+    )
 
     if out:
         dump_json(out, report)

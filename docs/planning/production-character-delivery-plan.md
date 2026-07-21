@@ -8,8 +8,9 @@
 | 기준일 | 2026-07-21 |
 | 적용 대상 | gpthreejs v0.2+ (quality-upgrade-execution M0–M6 이후) |
 | 언어 | 한국어 (실행 계획 묶음과 동일) |
-| 선행 문서 | [quality-upgrade-execution/readme.md](./quality-upgrade-execution/readme.md), [tasklist.md](./quality-upgrade-execution/tasklist.md) |
+| 선행 문서 | [quality-upgrade-execution/readme.md](./quality-upgrade-execution/readme.md), [tasklist.md](./quality-upgrade-execution/tasklist.md), [intake-and-reference-prep-upgrade.md](./intake-and-reference-prep-upgrade.md) |
 | 핵심 전제 | **3D LLM 메시 생성 없이** 절차적 TypeScript + 증거 게이트로 납품 준 품질에 도달 |
+| 입력 보강 | 참조 부족·텍스트 전용 요청의 **Reference Prep / GenerationBrief** 는 [intake-and-reference-prep-upgrade.md](./intake-and-reference-prep-upgrade.md) 가 담당 (납품 게이트 완화 아님) |
 
 ## 1. 목적
 

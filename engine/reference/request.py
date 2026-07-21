@@ -96,6 +96,13 @@ def validate_request_spec(spec: dict[str, Any]) -> list[str]:
         elif any(not isinstance(view, str) or not view for view in required_views):
             errors.append("$.requiredViews: expected non-empty string entries")
 
+    route = spec.get("route")
+    if route is not None:
+        from engine.reference.capture_defaults import INTAKE_ROUTES
+
+        if route not in INTAKE_ROUTES:
+            errors.append(f"$.route: unsupported route {route!r}")
+
     return errors
 
 

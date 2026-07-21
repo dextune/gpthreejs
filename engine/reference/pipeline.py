@@ -284,7 +284,7 @@ def sufficiency_reference_set(
         verdict = "conditional"
         sufficient = False
 
-    report = {
+    report: dict[str, Any] = {
         "schemaVersion": 1,
         "sufficient": sufficient,
         "verdict": verdict,
@@ -297,6 +297,50 @@ def sufficiency_reference_set(
         "requestSubject": request.get("subject"),
         "warnings": views.get("warnings") or [],
     }
+
+    # RP-003: emit GenerationBrief on abort/ask/generate_more-style outcomes.
+    if action in ("abort", "ask") or not sufficient:
+        from engine.reference.generation_brief import (
+            build_generation_brief_from_issues,
+            write_generation_brief,
+        )
+        from engine.sense.sufficiency_messages import next_steps, user_message
+
+        seed = str(image) if image and Path(str(image)).exists() else None
+        brief = build_generation_brief_from_issues(
+            issues,
+            request=request,
+            subject=str(request.get("subject") or "subject"),
+            seed_image=seed,
+        )
+        report["generationBrief"] = brief
+        domain = (
+            "character"
+            if request.get("modelingProfile") == "stylized-character"
+            else "object"
+        )
+        if out:
+            brief_path = Path(out).with_name("generation-brief.json")
+            write_generation_brief(brief_path, brief)
+            report["generationBriefPath"] = str(brief_path)
+            report["userMessage"] = user_message(
+                verdict,
+                issues,
+                domain=domain,
+                image=str(image or ""),
+                generation_brief_path=str(brief_path),
+            )
+            report["nextSteps"] = next_steps(
+                action,
+                issues,
+                generation_brief_path=str(brief_path),
+            )
+        else:
+            report["userMessage"] = user_message(
+                verdict, issues, domain=domain, image=str(image or "")
+            )
+            report["nextSteps"] = next_steps(action, issues)
+
     if out:
         dump_json(out, report)
     return report

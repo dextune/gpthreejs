@@ -81,6 +81,7 @@ M0 기준선·런타임 게이트
 | [07-delivery-sequencing-and-parallelization.md](./07-delivery-sequencing-and-parallelization.md) | 마일스톤, 의존성, 병렬 작업 lane, 범위 제외 |
 | [08-multi-agent-goal-prompt.md](./08-multi-agent-goal-prompt.md) | 고정 모델 배치, agent 역할, work packet, 리뷰 루프가 포함된 실행용 Goal 프롬프트 |
 | [tasklist.md](./tasklist.md) | 안정적인 작업 ID, 체크박스, 상태·증거·진척 로그 |
+| [../intake-and-reference-prep-upgrade.md](../intake-and-reference-prep-upgrade.md) | **후속 갭:** 텍스트 전용/부족 참조 시 GenerationBrief·Reference Prep, skill 루프, provider 실연결 (M0–M6 이후) |
 
 ## 유지하고 재사용할 것
 

@@ -1,11 +1,13 @@
 ---
 name: gpthreejs
 description: >
-  Lock a reference photo into a fidelity-gated, multi-view-checked, CPU-assisted
-  procedural Three.js form written as TypeScript. Use for image→3D code, product
-  props, hard-surface rebuilds, stylized characters, multi-view metric review,
-  perception packs, and parameter search. Triggers: /gpthreejs, photo to Three.js,
-  reconstruct object as code, image to 3D factory, reference-locked mesh code.
+  Lock a reference photo (or text-only concept via Reference Prep) into a
+  fidelity-gated, multi-view-checked, CPU-assisted procedural Three.js form
+  written as TypeScript. Use for image→3D code, product props, hard-surface
+  rebuilds, stylized characters, multi-view metric review, perception packs,
+  parameter search, and generation briefs when refs are thin. Triggers:
+  /gpthreejs, photo to Three.js, reconstruct object as code, image to 3D factory,
+  reference-locked mesh code, text-only character turnaround prep.
 license: MIT
 version: 0.1.0
 metadata:
@@ -22,13 +24,165 @@ one-shot chat blob.
 Host-agnostic: use native image read, browser MCP, project preview, or a user
 screenshot wherever this doc says “look” or “capture.”
 
+## How to use this skill (help)
+
+Use this section when the user invokes `/gpthreejs`, asks how the skill works,
+or starts an image→Three.js / text-concept→form job.
+
+### What this skill does
+
+1. Locks **evidence** (image and/or intent) into machine artifacts.  
+2. Gates cast with **sufficiency** (and multi-view delivery rules when applicable).  
+3. If evidence is thin → **Reference Prep** (GenerationBrief → gen/capture → register).  
+4. Only then builds a **layered** procedural TypeScript factory + blueprint journal.
+
+It does **not** download a mesh pack, invent hidden sides as “observed,” or skip
+gates because generation was inconvenient.
+
+### How to invoke
+
+| Trigger | Example user phrasing |
+| --- | --- |
+| Slash / skill name | `/gpthreejs`, “run gpthreejs” |
+| Image → code | “이 사진으로 Three.js factory 만들어줘”, “photo to Three.js” |
+| Concept only | “텍스트만으로 모던 기사 캐릭터 절차형 메시” |
+| Rebuild / prop | “hard-surface prop as editable TS”, “reference-locked mesh code” |
+
+**Working directory:** run engine commands from the skill / repo root
+(`python3 -m engine …`). Prefer a `work/` folder for JSON artifacts.
+
+### What the agent needs from the user
+
+Collect as early as possible (one missing is OK; do not block forever):
+
+1. **Intent sentence OR image** (path, attachment, or URL)  
+2. **Intended use** — e.g. game prop, hero still, likeness (default: real-time browser prop)  
+3. **Domain** — `object` | `character` | `hybrid`  
+4. **`qualityMode`** — `draft` \| `solid` \| `sharp` (default) \| `razor` \| `hybrid`  
+5. Optional: redesign note (“modern reinterpretation”), must-have identity features  
+
+If the user only gives a sentence, start **concept-first** prep — do not refuse
+for “no image.”
+
+### Quick decision tree
+
+```text
+Has usable multi-view / high-res refs?
+  YES → sense → sufficiency → (pass) brief → ledger → blueprint → cast layers
+  NO / reject / ask → Reference Prep first (never cast yet)
+
+No image at all?
+  → intake (concept-first) → GenerationBrief → gen or user capture
+  → reference-register (design-intent) → sufficiency-set → then cast path
+
+Low-res single sprite + “modern redesign”?
+  → redesign-from-ref: seed stays observed; new views design-intent
+  → do not claim original pixel likeness
+```
+
+### Minimal command paths
+
+**A) Image present (happy path sketch)**
+
+```bash
+python3 -m engine probe <image>
+python3 -m engine sense <image> --out work/sense --mode sharp
+python3 -m engine sufficiency <image> --sense work/sense \
+  --domain character --intent game --view-count 1 --out work/sufficiency.json
+# if agentAction=continue → brief → ledger → blueprint → cast (see Operating loop)
+```
+
+**B) Text only or sufficiency abort/ask**
+
+```bash
+python3 -m engine intake "modern fantasy knight" \
+  --domain character --route concept-first \
+  --out work/request-spec.json --brief-out work/generation-brief.json
+
+# Host or user produces PNGs under the brief (front+side, ≥512 short side,
+# transparent or solid neutral, A-pose). Then:
+
+python3 -m engine reference-register work/generation-brief.json \
+  --images work/gen/front.png work/gen/side.png \
+  --out work/reference-set.json
+python3 -m engine sufficiency-set work/reference-set.json \
+  --request work/request-spec.json --out work/sufficiency.json
+```
+
+**C) Thin image + issues file**
+
+```bash
+python3 -m engine reference-prep work/request-spec.json \
+  --issues work/sufficiency.json --seed-image <image> \
+  --out work/generation-brief.json
+# then register + sufficiency-set as above
+```
+
+### What to tell the user when blocked
+
+Do **not** stop at “need better images.” Always include:
+
+1. **Why** — issue codes (`RES_TOO_LOW`, `CHAR_NO_SIDE`, …)  
+2. **Capture/gen checklist** — short side ≥512 (hard floor 256), transparent or
+   solid neutral background, character **front + side** (back recommended),
+   A-pose/T-pose, one view per PNG  
+3. **Choices** — (A) host generates under GenerationBrief (B) user uploads
+   (C) explicit limited-info stylization waiver (discouraged; still no silent
+   gate bypass)
+
+Full prep defaults: `playbook/reference_prep.md`.
+
+### Agent rules (must / must not)
+
+| Must | Must not |
+| --- | --- |
+| Run sufficiency before cast | Cast on `agentAction=abort` |
+| Emit / open GenerationBrief on abort/ask or no image | Label gen views as `observed` |
+| Register gen as `design-intent` or `design-hypothesis` | Soften `RES_TOO_LOW` / multi-view delivery gates |
+| Layer cast (`mass` → …); unlock only current layer | Claim 360° likeness from one photo |
+| Use vocabulary table terms in user summaries | Silent hybrid GLB body |
+
+### CLI cheat sheet
+
+| Command | Purpose |
+| --- | --- |
+| `probe` / `sense` | CPU perception pack |
+| `sufficiency` / `sufficiency-set` | Gate + checklist + optional brief |
+| `intake` | Text → RequestSpec + GenerationBrief |
+| `reference-prep` | Issues/spec → GenerationBrief |
+| `reference-register` | Brief + images → ReferenceSet |
+| `brief` / `ledger` / `blueprint` / `validate` | Spec chain |
+| `layers` / `cast` / `fit` | Layered factory emit |
+| `sheet` / `grid` / `metrics` / `journal` | Critique loop |
+
+List subcommands: `python3 -m engine -h` (or run without args if parser shows help).
+
+### Where to read next
+
+| Topic | Doc |
+| --- | --- |
+| Full operating loop | sections below in this file |
+| Reference Prep | `playbook/reference_prep.md` |
+| Sufficiency codes | `playbook/sufficiency.md` |
+| Suitability | `playbook/suitability.md` |
+| Fidelity pact | `playbook/fidelity_pact.md` |
+| Cast layers | `playbook/cast_layers.md` |
+| Critique accept rules | `playbook/critique.md` |
+| Planning / gaps | `docs/planning/intake-and-reference-prep-upgrade.md` |
+
+### Demo / samples
+
+- Knight multi-view samples: `samples/knight/`  
+- Local preview (if present): `demo/` — install deps there, not required for engine gates  
+
 ## When to run
 
-User attaches or points at an object/character image and wants:
+User attaches or points at an object/character image **or gives intent text only** and wants:
 - a Three.js `Group` factory in TypeScript
 - a Form Blueprint + Feature Ledger before code
 - multi-view fidelity checks (mask IoU, SSIM, edge F1)
 - optional hybrid import of an external GLB as a draft body
+- **or** a casting-favorable GenerationBrief when references are missing/thin
 
 ## Non-goals
 
@@ -126,15 +280,52 @@ python3 -m engine sufficiency <image> --sense work/sense \
 | `agentAction` | `continue` \| `ask` \| `abort` |
 | `issues[]` | code, severity, message, **remedy** |
 | `userMessage` | Korean end-user summary returned verbatim |
+| `generationBrief` / `generationBriefPath` | emitted on abort/ask (Reference Prep) |
 
 **Rules**
 
-- `agentAction=abort` → **no cast/codegen**; show remedies.  
+- `agentAction=abort` → **no cast/codegen**; show remedies + capture/gen checklist.  
 - `agentAction=ask` → request more views / crop / exposure / fill ledger; state stylization limits.  
 - `agentAction=continue` → proceed; log minor issues in the journal.  
 - Character + single view → treat `CHAR_*` majors seriously; never claim full likeness.
 
 Full codes: `playbook/sufficiency.md`. Topic suitability: `playbook/suitability.md`.
+
+### 1c) Reference Prep (when abort/ask/generate_more or no image)
+
+Do **not** jump to cast when evidence is thin. Prep first:
+
+```text
+- emit GenerationBrief
+- if host can generate images: produce views under brief
+- register ReferenceSet with correct evidenceClass
+  (design-intent | design-hypothesis — never silent observed for gen views)
+- re-run sufficiency-set
+- only then cast
+```
+
+```bash
+# Text-only / concept-first (intent without image)
+python3 -m engine intake "modern fantasy knight" \
+  --domain character --route concept-first \
+  --out work/request-spec.json --brief-out work/generation-brief.json
+
+# From RequestSpec + sufficiency issues
+python3 -m engine reference-prep work/request-spec.json \
+  --issues work/sufficiency.json \
+  --out work/generation-brief.json
+
+# Register generated/captured views, then re-check
+python3 -m engine reference-register work/generation-brief.json \
+  --images work/gen/front.png work/gen/side.png \
+  --out work/reference-set.json
+python3 -m engine sufficiency-set work/reference-set.json \
+  --request work/request-spec.json --out work/sufficiency.json
+```
+
+Casting-favorable defaults (short side ≥512 recommended, transparent or solid
+neutral background, character front+side required, A-pose/T-pose): see
+`playbook/reference_prep.md` and `engine/reference/capture_defaults.py`.
 
 ### 2) Intake Brief + Fidelity Pact
 
@@ -256,12 +447,19 @@ Guide: `playbook/critique.md`.
 
 ## Required inputs
 
-1. Image path / attachment / URL  
+1. **Intent sentence OR image** (path / attachment / URL) — either is enough to start  
 2. Intended use (default: real-time browser prop)  
 3. `qualityMode` if user cares about fidelity vs speed  
 
+| Input | Path |
+| --- | --- |
+| Intent only | `intake` → GenerationBrief → generate/capture → `reference-register` → sufficiency → cast |
+| Thin / low-res image | sufficiency → Reference Prep → re-register → sufficiency → cast |
+| Sufficient multi-view | existing sense → sufficiency → cast |
+
 If the image is unreadable or unsuitable, run suitability from
-`playbook/suitability.md` and `ask` or `abort`.
+`playbook/suitability.md`, then **Reference Prep** (`playbook/reference_prep.md`)
+rather than only saying “need better images.”
 
 ## Outputs
 
