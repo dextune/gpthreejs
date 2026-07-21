@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "name": "ExampleProp",
+  "bodySource": "procedural",
+  "qualityMode": "sharp",
+  "domain": "object",
+  "complexity": "simple",
+  "fidelityPact": {
+    "targetFidelity": 0.65,
+    "metricFloors": {
+      "maskIoU_front": 0.8,
+      "ssim_front": 0.45,
+      "edgeF1": 0.2,
+      "vision": 0.7
+    },
+    "mustCapture": ["silhouette", "primary palette"],
+    "mayApproximate": ["unseen back faces"],
+    "ledgerMin": 3
+  },
+  "parts": [
+    {
+      "id": "body",
+      "role": "primary",
+      "geometry": { "kind": "box", "size": [1.0, 0.6, 0.5] },
+      "transform": { "position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1] },
+      "materialId": "paint",
+      "features": [
+        {
+          "id": "top-bevel",
+          "kind": "bevel",
+          "description": "soft chamfer on top rim"
+        }
+      ],
+      "children": []
+    }
+  ],
+  "materials": [
+    {
+      "id": "paint",
+      "type": "physical",
+      "baseColor": "#c43c3c",
+      "roughness": 0.4,
+      "metalness": 0.05,
+      "overrides": []
+    }
+  ],
+  "lights": [
+    { "id": "key", "kind": "directional", "intensity": 1.1, "position": [2, 3, 2] }
+  ],
+  "handles": {
+    "pivots": [{ "id": "origin", "part": "body", "local": [0, 0, 0] }],
+    "sockets": [],
+    "colliders": [{ "id": "body", "part": "body", "kind": "box" }],
+    "breakGroups": []
+  },
+  "layers": {
+    "mass": { "status": "open", "reviews": [] },
+    "skeleton": { "status": "locked", "reviews": [] },
+    "contour": { "status": "locked", "reviews": [] },
+    "skin": { "status": "locked", "reviews": [] },
+    "light": { "status": "locked", "reviews": [] },
+    "handle": { "status": "locked", "reviews": [] },
+    "polish": { "status": "locked", "reviews": [] }
+  },
+  "journal": [],
+  "criticalFeatures": [
+    {
+      "id": "silhouette",
+      "layer": "mass",
+      "floor": 0.75,
+      "description": "Mass matches reference silhouette"
+    }
+  ],
+  "seed": 7
+}

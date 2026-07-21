@@ -1,0 +1,5 @@
+# Optional CPU vision extras for gpthreejs (not required for core CLI)
+numpy>=1.24
+opencv-python-headless>=4.8
+# onnxruntime>=1.16
+# rembg>=2.0

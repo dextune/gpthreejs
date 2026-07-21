@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+work/
+dist/
+*.egg-info/
+.venv/
+venv/
+node_modules/
+src/create*Form.ts
+.DS_Store

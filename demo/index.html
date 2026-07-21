@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>gpthreejs Knight — Three.js</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #0e1116; color: #e8eaed; font-family: ui-sans-serif, system-ui, sans-serif; }
+      #app { position: fixed; inset: 0; }
+      canvas { display: block; width: 100%; height: 100%; }
+      .hud {
+        position: fixed; left: 16px; top: 16px; z-index: 2;
+        background: rgba(10,12,16,.72); border: 1px solid #2a3140;
+        border-radius: 12px; padding: 12px 14px; max-width: 320px;
+        backdrop-filter: blur(8px); font-size: 13px; line-height: 1.45;
+      }
+      .hud h1 { margin: 0 0 6px; font-size: 15px; font-weight: 650; }
+      .hud code { font-size: 11px; color: #9ecbff; }
+      .refs { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+      .refs img { width: 56px; height: 74px; object-fit: cover; border-radius: 6px; border: 1px solid #333; background: #222; }
+      .hint { opacity: .75; margin-top: 8px; }
+    </style>
+  </head>
+  <body>
+    <div class="hud">
+      <h1>gpthreejs · Knight</h1>
+      <div>Procedural <code>createKnightForm()</code> · game-ready <code>formHandles</code></div>
+      <div class="hint">드래그: 회전 · 스크롤: 줌 · 우클릭: 팬</div>
+      <div class="refs" id="refs"></div>
+    </div>
+    <div id="app"></div>
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>
