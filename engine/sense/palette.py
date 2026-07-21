@@ -5,15 +5,24 @@ from __future__ import annotations
 from collections import Counter
 from pathlib import Path
 
-from engine.shared.pngio import read_png
+from engine.shared.pngio import Image, read_png
 
 
-def extract_palette(image_path: str | Path, k: int = 6, step: int = 4) -> dict:
-    img = read_png(image_path)
+def extract_palette(
+    image_path: str | Path,
+    k: int = 6,
+    step: int = 4,
+    *,
+    source_image: Image | None = None,
+) -> dict:
+    img = source_image or read_png(image_path)
+    rgba = img.rgba
     counter: Counter[tuple[int, int, int]] = Counter()
     for y in range(0, img.height, step):
+        row = y * img.width
         for x in range(0, img.width, step):
-            r, g, b, a = img.pixel(x, y)
+            i = (row + x) * 4
+            r, g, b, a = rgba[i], rgba[i + 1], rgba[i + 2], rgba[i + 3]
             if a < 16:
                 continue
             # quantize to 32 levels

@@ -8,38 +8,37 @@ from engine.sense.depth_proxy import build_depth_proxy
 from engine.sense.edges import build_edges
 from engine.sense.matte import build_matte
 from engine.sense.palette import extract_palette
-from engine.sense.probe import probe_image
+from engine.sense.probe import probe_image, probe_loaded_png
+from engine.contracts.modes import QUALITY_MODES
 from engine.shared.jsonutil import dump_json
-from engine.shared.pngio import read_png, resize_nearest, write_png
+from engine.shared.pngio import Image, read_png, resize_nearest, write_png
 
 
-MODES = ("draft", "solid", "sharp", "razor", "hybrid")
-
-
-def _ensure_png_workcopy(image_path: Path, out_dir: Path, max_side: int = 1024) -> Path:
+def _ensure_png_workcopy(image_path: Path, out_dir: Path, max_side: int = 1024) -> tuple[Path, Image, dict]:
     """If PNG, optionally downscale for CPU work. Non-PNG: raise with clear message."""
     if image_path.suffix.lower() != ".png":
         raise SystemExit(
             f"Sense Pack currently requires PNG. Convert {image_path} to PNG first."
         )
     img = read_png(image_path)
+    meta = probe_loaded_png(image_path, img)
     work = out_dir / "reference_work.png"
     m = max(img.width, img.height)
     if m > max_side:
         scale = max_side / m
         img = resize_nearest(img, max(1, int(img.width * scale)), max(1, int(img.height * scale)))
     write_png(work, img)
-    return work
+    return work, img, meta
 
 
 def build_sense_pack(image_path: str | Path, out_dir: str | Path, mode: str = "sharp") -> dict:
-    if mode not in MODES:
-        raise ValueError(f"mode must be one of {MODES}")
+    if mode not in QUALITY_MODES:
+        raise ValueError(f"mode must be one of {QUALITY_MODES}")
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     src = Path(image_path)
-    meta = probe_image(src)
     if mode == "draft":
+        meta = probe_image(src)
         pack = {
             "version": 1,
             "mode": mode,
@@ -51,13 +50,13 @@ def build_sense_pack(image_path: str | Path, out_dir: str | Path, mode: str = "s
         dump_json(out / "sense_pack.json", pack)
         return pack
 
-    work = _ensure_png_workcopy(src, out)
+    work, work_img, meta = _ensure_png_workcopy(src, out)
     maps: dict = {}
-    maps["matte"] = build_matte(work, out / "matte.png")
-    maps["edges"] = build_edges(work, out / "edges.png")
+    maps["matte"] = build_matte(work, out / "matte.png", source_image=work_img)
+    maps["edges"] = build_edges(work, out / "edges.png", source_image=work_img)
     if mode in ("sharp", "razor", "hybrid"):
-        maps["depth_proxy"] = build_depth_proxy(work, out / "depth_proxy.png")
-    palette = extract_palette(work)
+        maps["depth_proxy"] = build_depth_proxy(work, out / "depth_proxy.png", source_image=work_img)
+    palette = extract_palette(work, source_image=work_img)
     # 3x3 part grid proposals from matte bbox
     bbox = maps["matte"]["bbox"]
     part_grid = []

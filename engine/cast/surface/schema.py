@@ -4,24 +4,14 @@ from __future__ import annotations
 
 from typing import Any
 
-
-# Universal material roles used by bake + runtime kit
-SURFACE_ROLES = (
-    "metal",
-    "painted_metal",
-    "brass",
-    "cloth",
-    "leather",
-    "rubber",
-    "plastic",
-    "wood",
-    "stone",
-    "skin",
-    "emissive",
-    "default",
+from engine.cast.surface.presets import SURFACE_ROLES
+from engine.contracts.modes import (
+    DETAIL_LEVELS,
+    DETAIL_RIVET_LIMITS,
+    detail_resolution,
+    normalize_detail_level,
+    quality_mode_to_detail_level,
 )
-
-DETAIL_LEVELS = ("low", "medium", "high", "ultra")
 
 
 def default_surface_stack(
@@ -30,11 +20,8 @@ def default_surface_stack(
     resolution: int = 512,
     seed: int = 42,
 ) -> dict[str, Any]:
-    if detail_level not in DETAIL_LEVELS:
-        detail_level = "high"
-    res = { "low": 256, "medium": 512, "high": 512, "ultra": 1024 }.get(detail_level, 512)
-    if resolution:
-        res = resolution
+    detail_level = normalize_detail_level(detail_level)
+    res = detail_resolution(detail_level, resolution)
     return {
         "version": 1,
         "detailLevel": detail_level,
@@ -59,7 +46,7 @@ def default_surface_stack(
         "roles": {role: {"preset": role} for role in SURFACE_ROLES},
         "budget": {
             "maxMapResolution": res,
-            "maxRivetInstances": {"low": 0, "medium": 64, "high": 256, "ultra": 512}[detail_level],
+            "maxRivetInstances": DETAIL_RIVET_LIMITS[detail_level],
             "preferMapsOverGeometry": True,
         },
     }
@@ -68,12 +55,7 @@ def default_surface_stack(
 def merge_surface_into_blueprint(blueprint: dict[str, Any], stack: dict[str, Any] | None = None) -> dict[str, Any]:
     """Attach a surfaceStack and ensure materials reference a surfaceRole."""
     stack = stack or default_surface_stack(
-        detail_level=str(blueprint.get("qualityMode") or "sharp")
-        .replace("draft", "low")
-        .replace("solid", "medium")
-        .replace("sharp", "high")
-        .replace("razor", "ultra")
-        .replace("hybrid", "high"),
+        detail_level=quality_mode_to_detail_level(blueprint.get("qualityMode")),
         seed=int(blueprint.get("seed") or 42),
     )
     # qualityMode may not map cleanly — normalize

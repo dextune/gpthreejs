@@ -7,6 +7,7 @@
  *   lib.rivetRing(parent, { radius: 0.2, count: 12, material: brass });
  */
 import * as THREE from "three";
+import surfacePresetData from "../../../engine/cast/surface/presets.json";
 
 export type DetailLevel = "low" | "medium" | "high" | "ultra";
 
@@ -49,6 +50,7 @@ export interface PhysicalOpts {
 
 interface RolePreset {
   roughness: number;
+  roughVar: number;
   metalness: number;
   clearcoat: number;
   clearcoatRoughness: number;
@@ -59,122 +61,48 @@ interface RolePreset {
   panel?: number;
   scratch?: number;
   grain?: number;
+  aoEdge?: number;
 }
 
-const ROLE_PRESETS: Record<SurfaceRole, RolePreset> = {
-  metal: {
-    roughness: 0.32,
-    metalness: 0.9,
-    clearcoat: 0.3,
-    clearcoatRoughness: 0.35,
-    normalScale: 1.0,
-    panel: 0.7,
-    scratch: 0.55,
-    grain: 0.3,
-  },
-  painted_metal: {
-    roughness: 0.42,
-    metalness: 0.55,
-    clearcoat: 0.45,
-    clearcoatRoughness: 0.3,
-    normalScale: 0.7,
-    panel: 0.5,
-    scratch: 0.4,
-    grain: 0.2,
-  },
-  brass: {
-    roughness: 0.28,
-    metalness: 0.95,
-    clearcoat: 0.4,
-    clearcoatRoughness: 0.25,
-    normalScale: 0.55,
-    panel: 0.25,
-    scratch: 0.35,
-    grain: 0.25,
-  },
-  cloth: {
-    roughness: 0.78,
-    metalness: 0.0,
-    clearcoat: 0.0,
-    clearcoatRoughness: 1,
-    sheen: 0.25,
-    normalScale: 0.9,
-    weave: true,
-    grain: 0.85,
-    panel: 0.1,
-    scratch: 0.05,
-  },
-  leather: {
-    roughness: 0.82,
-    metalness: 0.05,
-    clearcoat: 0.05,
-    clearcoatRoughness: 0.6,
-    normalScale: 0.85,
-    grain: 0.75,
-    panel: 0.15,
-    scratch: 0.15,
-  },
-  rubber: {
-    roughness: 0.9,
-    metalness: 0.0,
-    clearcoat: 0.0,
-    clearcoatRoughness: 1,
-    normalScale: 0.4,
-    grain: 0.4,
-  },
-  plastic: {
-    roughness: 0.45,
-    metalness: 0.05,
-    clearcoat: 0.35,
-    clearcoatRoughness: 0.4,
-    normalScale: 0.35,
-    grain: 0.15,
-    panel: 0.2,
-  },
-  wood: {
-    roughness: 0.7,
-    metalness: 0.0,
-    clearcoat: 0.1,
-    clearcoatRoughness: 0.5,
-    normalScale: 0.75,
-    anisoGrain: true,
-    grain: 0.9,
-  },
-  stone: {
-    roughness: 0.85,
-    metalness: 0.0,
-    clearcoat: 0.0,
-    clearcoatRoughness: 1,
-    normalScale: 1.0,
-    grain: 0.85,
-    panel: 0.2,
-  },
-  skin: {
-    roughness: 0.55,
-    metalness: 0.0,
-    clearcoat: 0.15,
-    clearcoatRoughness: 0.5,
-    normalScale: 0.35,
-    grain: 0.4,
-  },
-  emissive: {
-    roughness: 0.35,
-    metalness: 0.2,
-    clearcoat: 0.2,
-    clearcoatRoughness: 0.4,
-    normalScale: 0.2,
-    grain: 0.1,
-  },
-  default: {
-    roughness: 0.5,
-    metalness: 0.1,
-    clearcoat: 0.1,
-    clearcoatRoughness: 0.5,
-    normalScale: 0.5,
-    grain: 0.3,
-    panel: 0.3,
-  },
-};
+interface SurfacePresetContract {
+  base_rough?: number;
+  rough_var?: number;
+  scratch?: number;
+  panel?: number;
+  grain?: number;
+  ao_edge?: number;
+  normal_strength?: number;
+  weave?: boolean;
+  aniso_grain?: boolean;
+  metalness?: number;
+  clearcoat?: number;
+  clearcoat_roughness?: number;
+  sheen?: number;
+}
+
+const SURFACE_PRESET_DATA = surfacePresetData as Record<SurfaceRole, SurfacePresetContract>;
+
+function toRolePreset(preset: SurfacePresetContract): RolePreset {
+  return {
+    roughness: preset.base_rough ?? 0.5,
+    roughVar: preset.rough_var ?? 0.1,
+    metalness: preset.metalness ?? 0.1,
+    clearcoat: preset.clearcoat ?? 0.1,
+    clearcoatRoughness: preset.clearcoat_roughness ?? 0.5,
+    sheen: preset.sheen,
+    normalScale: preset.normal_strength ?? 0.5,
+    weave: preset.weave,
+    anisoGrain: preset.aniso_grain,
+    panel: preset.panel,
+    scratch: preset.scratch,
+    grain: preset.grain,
+    aoEdge: preset.ao_edge,
+  };
+}
+
+const ROLE_PRESETS = Object.fromEntries(
+  Object.entries(SURFACE_PRESET_DATA).map(([role, preset]) => [role, toRolePreset(preset)]),
+) as Record<SurfaceRole, RolePreset>;
 
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
@@ -185,6 +113,15 @@ function mulberry32(seed: number): () => number {
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
+}
+
+function stableRoleSeed(role: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < role.length; i++) {
+    h ^= role.charCodeAt(i);
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return h % 10000;
 }
 
 function hash2(x: number, y: number, seed: number): number {
@@ -268,7 +205,7 @@ export function bakeRoleMaps(
         h += (hash2(x, y, seed + 9) - 0.5) * scratch * 0.4;
       }
       const border = Math.min(u, v, 1 - u, 1 - v);
-      if (border < 0.08) h -= (0.08 - border) * 2 * 0.25;
+      if (border < 0.08) h -= (0.08 - border) * 2 * (preset.aoEdge ?? 0.25);
       height[y * size + x] = h * ns;
     }
   }
@@ -311,7 +248,10 @@ export function bakeRoleMaps(
 
       const wear = Math.min(1, Math.abs(height[i]) * 0.8);
       const rn = fbm(x / size * 10, y / size * 10, seed + 11);
-      const rough = Math.min(1, Math.max(0, baseR + (rn - 0.5) * 0.2 + wear * 0.15));
+      const rough = Math.min(
+        1,
+        Math.max(0, baseR + (rn - 0.5) * 2 * preset.roughVar + wear * 0.15),
+      );
       const rv = rough * 255;
       rimg.data[ni] = rimg.data[ni + 1] = rimg.data[ni + 2] = rv;
       rimg.data[ni + 3] = 255;
@@ -367,7 +307,7 @@ export class SurfaceLibrary {
     const key = `${role}@${this.resolution}`;
     let m = this.cache.get(key);
     if (!m) {
-      m = bakeRoleMaps(role, this.resolution, this.seed + role.length * 17);
+      m = bakeRoleMaps(role, this.resolution, this.seed + stableRoleSeed(role));
       // scale tiling slightly by role
       const rep = role === "cloth" || role === "leather" ? 3 : role === "metal" ? 2 : 1.5;
       m.normal.repeat.set(rep, rep);

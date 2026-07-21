@@ -11,6 +11,8 @@ from engine.blueprint.schema import (
     DEFAULT_METRIC_FLOORS,
     LAYERS,
 )
+from engine.cast.surface.schema import default_surface_stack, merge_surface_into_blueprint
+from engine.contracts.modes import quality_mode_to_detail_level
 from engine.shared.jsonutil import dump_json, load_json
 
 
@@ -236,22 +238,11 @@ def draft_blueprint(
         ],
         "seed": 42,
     }
-    # Generic surface detail stack (maps + meso flags) — domain-agnostic
-    try:
-        from engine.cast.surface.schema import default_surface_stack, merge_surface_into_blueprint
-
-        level = {
-            "draft": "low",
-            "solid": "medium",
-            "sharp": "high",
-            "razor": "ultra",
-            "hybrid": "high",
-        }.get(str(brief.get("qualityMode") or "sharp"), "high")
-        merge_surface_into_blueprint(
-            bp,
-            default_surface_stack(detail_level=level, seed=int(bp.get("seed") or 42)),
-        )
-    except Exception:
-        pass
+    # Surface detail is part of the blueprint contract; failures should stay visible.
+    level = quality_mode_to_detail_level(brief.get("qualityMode"))
+    merge_surface_into_blueprint(
+        bp,
+        default_surface_stack(detail_level=level, seed=int(bp.get("seed") or 42)),
+    )
     dump_json(out, bp)
     return bp

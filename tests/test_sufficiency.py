@@ -35,7 +35,7 @@ class SufficiencyTests(unittest.TestCase):
         self.assertFalse(r["sufficient"])
         self.assertEqual(r["agentAction"], "abort")
         self.assertTrue(any(i["code"] == "FILE_MISSING" for i in r["issues"]))
-        self.assertIn("부족", r["userMessage"])
+        self.assertIn("insufficient", r["userMessage"])
 
     def test_tiny_resolution_blocker(self) -> None:
         with tempfile.TemporaryDirectory() as td:

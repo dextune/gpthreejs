@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from engine.blueprint.schema import DECISIONS, LAYERS
+from engine.blueprint.schema import COMPLEXITY_LEDGER_MIN
 from engine.shared.jsonutil import load_json
 
 
@@ -71,9 +71,7 @@ def validate_blueprint(path: str | Path, *, strict: bool = False) -> ValidationR
     # strict fidelity
     complexity = bp.get("complexity", "moderate")
     pact = bp.get("fidelityPact") or {}
-    ledger_min = pact.get("ledgerMin") or {"simple": 3, "moderate": 6, "complex": 10, "ultra": 16}.get(
-        complexity, 6
-    )
+    ledger_min = pact.get("ledgerMin") or COMPLEXITY_LEDGER_MIN.get(complexity, 6)
     ledger = bp.get("ledger") or {}
     entries = [e for e in ledger.get("entries") or [] if e.get("status") != "todo"]
     todos = [e for e in ledger.get("entries") or [] if e.get("status") == "todo"]

@@ -7,127 +7,14 @@ Used by CLI `surface-bake` and any factory that prefers offline maps over canvas
 
 from __future__ import annotations
 
+from array import array
 import math
-import random
 from pathlib import Path
 from typing import Any
 
+from engine.cast.surface.presets import SURFACE_PRESETS, stable_role_seed
 from engine.shared.jsonutil import dump_json
 from engine.shared.pngio import Image, write_png
-
-
-SURFACE_PRESETS: dict[str, dict[str, Any]] = {
-    "metal": {
-        "base_rough": 0.32,
-        "rough_var": 0.12,
-        "scratch": 0.55,
-        "panel": 0.7,
-        "grain": 0.25,
-        "ao_edge": 0.35,
-        "normal_strength": 1.0,
-    },
-    "painted_metal": {
-        "base_rough": 0.42,
-        "rough_var": 0.1,
-        "scratch": 0.4,
-        "panel": 0.5,
-        "grain": 0.15,
-        "ao_edge": 0.3,
-        "normal_strength": 0.7,
-    },
-    "brass": {
-        "base_rough": 0.28,
-        "rough_var": 0.08,
-        "scratch": 0.35,
-        "panel": 0.25,
-        "grain": 0.2,
-        "ao_edge": 0.2,
-        "normal_strength": 0.6,
-    },
-    "cloth": {
-        "base_rough": 0.78,
-        "rough_var": 0.06,
-        "scratch": 0.05,
-        "panel": 0.1,
-        "grain": 0.85,
-        "ao_edge": 0.25,
-        "normal_strength": 0.9,
-        "weave": True,
-    },
-    "leather": {
-        "base_rough": 0.82,
-        "rough_var": 0.1,
-        "scratch": 0.15,
-        "panel": 0.15,
-        "grain": 0.7,
-        "ao_edge": 0.35,
-        "normal_strength": 0.85,
-    },
-    "rubber": {
-        "base_rough": 0.9,
-        "rough_var": 0.04,
-        "scratch": 0.1,
-        "panel": 0.05,
-        "grain": 0.4,
-        "ao_edge": 0.2,
-        "normal_strength": 0.4,
-    },
-    "plastic": {
-        "base_rough": 0.45,
-        "rough_var": 0.08,
-        "scratch": 0.2,
-        "panel": 0.2,
-        "grain": 0.15,
-        "ao_edge": 0.15,
-        "normal_strength": 0.35,
-    },
-    "wood": {
-        "base_rough": 0.7,
-        "rough_var": 0.12,
-        "scratch": 0.2,
-        "panel": 0.1,
-        "grain": 0.9,
-        "ao_edge": 0.3,
-        "normal_strength": 0.75,
-        "aniso_grain": True,
-    },
-    "stone": {
-        "base_rough": 0.85,
-        "rough_var": 0.15,
-        "scratch": 0.1,
-        "panel": 0.2,
-        "grain": 0.8,
-        "ao_edge": 0.4,
-        "normal_strength": 1.0,
-    },
-    "skin": {
-        "base_rough": 0.55,
-        "rough_var": 0.08,
-        "scratch": 0.05,
-        "panel": 0.0,
-        "grain": 0.45,
-        "ao_edge": 0.15,
-        "normal_strength": 0.4,
-    },
-    "emissive": {
-        "base_rough": 0.35,
-        "rough_var": 0.05,
-        "scratch": 0.0,
-        "panel": 0.1,
-        "grain": 0.1,
-        "ao_edge": 0.1,
-        "normal_strength": 0.2,
-    },
-    "default": {
-        "base_rough": 0.5,
-        "rough_var": 0.1,
-        "scratch": 0.2,
-        "panel": 0.3,
-        "grain": 0.3,
-        "ao_edge": 0.25,
-        "normal_strength": 0.6,
-    },
-}
 
 
 def _hash2(x: int, y: int, seed: int) -> float:
@@ -167,9 +54,9 @@ def _height_field(
     size: int,
     preset: dict[str, Any],
     seed: int,
-) -> list[list[float]]:
+) -> array:
     """Return height in roughly [-1, 1] for normal derivation."""
-    h = [[0.0] * size for _ in range(size)]
+    h = array("f", [0.0]) * (size * size)
     strength = float(preset.get("normal_strength", 0.6))
     weave = bool(preset.get("weave"))
     aniso = bool(preset.get("aniso_grain"))
@@ -206,18 +93,21 @@ def _height_field(
             if border < 0.08:
                 height -= (0.08 - border) * 2.0 * float(preset.get("ao_edge", 0.25))
 
-            h[y][x] = height * strength
+            h[y * size + x] = height * strength
     return h
 
 
-def _normal_from_height(h: list[list[float]], size: int) -> Image:
+def _normal_from_height(h: array, size: int) -> Image:
     img = Image(size, size, bytearray(size * size * 4))
     for y in range(size):
+        row = y * size
+        y0_row = (y - 1 if y else y) * size
+        y1_row = (y + 1 if y + 1 < size else y) * size
         for x in range(size):
-            x0 = h[y][x - 1 if x else x]
-            x1 = h[y][x + 1 if x + 1 < size else x]
-            y0 = h[y - 1 if y else y][x]
-            y1 = h[y + 1 if y + 1 < size else y][x]
+            x0 = h[row + (x - 1 if x else x)]
+            x1 = h[row + (x + 1 if x + 1 < size else x)]
+            y0 = h[y0_row + x]
+            y1 = h[y1_row + x]
             dx = (x1 - x0) * 0.5
             dy = (y1 - y0) * 0.5
             # normal = normalize(-dx, -dy, 1)
@@ -231,15 +121,16 @@ def _normal_from_height(h: list[list[float]], size: int) -> Image:
     return img
 
 
-def _roughness_map(size: int, preset: dict[str, Any], seed: int, h: list[list[float]]) -> Image:
+def _roughness_map(size: int, preset: dict[str, Any], seed: int, h: array) -> Image:
     base = float(preset.get("base_rough", 0.5))
     var = float(preset.get("rough_var", 0.1))
     img = Image(size, size, bytearray(size * size * 4))
     for y in range(size):
+        row = y * size
         for x in range(size):
             n = _fbm(x / size * 10, y / size * 10, seed + 11)
             # higher height variation → slightly rougher (edge wear proxy)
-            wear = min(1.0, abs(h[y][x]) * 0.8)
+            wear = min(1.0, abs(h[row + x]) * 0.8)
             rough = base + (n - 0.5) * 2 * var + wear * 0.15
             rough = max(0.0, min(1.0, rough))
             v = int(rough * 255)
@@ -247,12 +138,13 @@ def _roughness_map(size: int, preset: dict[str, Any], seed: int, h: list[list[fl
     return img
 
 
-def _ao_map(size: int, h: list[list[float]]) -> Image:
+def _ao_map(size: int, h: array) -> Image:
     img = Image(size, size, bytearray(size * size * 4))
     for y in range(size):
+        row = y * size
         for x in range(size):
             # lower height → more occlusion
-            v = h[y][x]
+            v = h[row + x]
             ao = max(0.0, min(1.0, 0.65 + v * 0.5))
             c = int(ao * 255)
             img.set_pixel(x, y, (c, c, c, 255))
@@ -271,7 +163,7 @@ def bake_role(
     preset = SURFACE_PRESETS.get(role, SURFACE_PRESETS["default"])
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
-    h = _height_field(size, preset, seed + hash(role) % 10000)
+    h = _height_field(size, preset, seed + stable_role_seed(role))
     paths: dict[str, str] = {}
     if maps.get("normal", True):
         p = out / f"{role}_normal.png"

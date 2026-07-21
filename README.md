@@ -190,27 +190,13 @@ tests/         Python smoke and regression tests
 5. Use maps for micro detail and kits for meso detail.
 6. Admit blind sides; one photo does not prove hidden geometry.
 
-## Localized Summaries
+## English-Only Documentation
 
-### 한국어
-
-gpthreejs는 참조 이미지를 Sense Pack, Feature Ledger, Form Blueprint, TypeScript
-`THREE.Group` 팩토리로 변환하는 절차적 Three.js 제작 도구입니다. 사진측량이나
-마켓플레이스 메시 다운로드가 아니라, 검증 가능한 지표와 편집 가능한 소스 코드를
-출력하는 것을 목표로 합니다. 프로젝트 문서는 `docs/` 아래에서 유형별로 관리합니다.
-
-### 中文
-
-gpthreejs 将参考图像转换为 Sense Pack、Feature Ledger、Form Blueprint 和
-TypeScript `THREE.Group` 工厂。它不是摄影测量，也不是模型市场下载流程；目标是
-输出可验证、可编辑的程序化 Three.js 源码。项目文档按类型统一放在 `docs/` 目录中。
-
-### 日本語
-
-gpthreejs は参照画像を Sense Pack、Feature Ledger、Form Blueprint、TypeScript
-`THREE.Group` ファクトリへ変換する手続き型 Three.js 制作ツールです。フォトグラメトリ
-やメッシュ配布ではなく、検証可能で編集できるソースコードを出力することを目的とします。
-プロジェクト文書は種類別に `docs/` 配下で管理します。
+All repository documentation and runtime-facing source text is maintained in
+English. gpthreejs converts reference images into Sense Packs, Feature Ledgers,
+Form Blueprints, and editable TypeScript `THREE.Group` factories. It is not a
+photogrammetry or marketplace mesh workflow; the goal is verifiable metrics and
+source code that remains inspectable, reusable, and owned by the project.
 
 ## License
 

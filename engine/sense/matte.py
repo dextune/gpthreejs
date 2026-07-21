@@ -25,17 +25,20 @@ def _corner_bg_color(img: Image) -> tuple[int, int, int]:
 def matte_heuristic(img: Image, threshold: int = 42) -> Image:
     """Simple distance-to-corner-background matte. Good enough for product shots."""
     br, bg, bb = _corner_bg_color(img)
-    out = Image(img.width, img.height, bytearray(len(img.rgba)))
-    for y in range(img.height):
-        for x in range(img.width):
-            r, g, b, a = img.pixel(x, y)
-            dist = abs(r - br) + abs(g - bg) + abs(b - bb)
-            alpha = 255 if dist >= threshold else 0
-            # soft band
-            if threshold - 12 <= dist < threshold:
-                alpha = int(255 * (dist - (threshold - 12)) / 12)
-            out.set_pixel(x, y, (r, g, b, alpha if a > 0 else 0))
-    return out
+    src = img.rgba
+    dst = bytearray(len(src))
+    soft_min = threshold - 12
+    for i in range(0, len(src), 4):
+        r, g, b, a = src[i], src[i + 1], src[i + 2], src[i + 3]
+        dist = abs(r - br) + abs(g - bg) + abs(b - bb)
+        alpha = 255 if dist >= threshold else 0
+        if soft_min <= dist < threshold:
+            alpha = int(255 * (dist - soft_min) / 12)
+        dst[i] = r
+        dst[i + 1] = g
+        dst[i + 2] = b
+        dst[i + 3] = alpha if a > 0 else 0
+    return Image(img.width, img.height, dst)
 
 
 def matte_optional_rembg(path: Path) -> Image | None:
@@ -59,9 +62,14 @@ def matte_optional_rembg(path: Path) -> Image | None:
         return None
 
 
-def build_matte(image_path: str | Path, out_path: str | Path) -> dict:
+def build_matte(
+    image_path: str | Path,
+    out_path: str | Path,
+    *,
+    source_image: Image | None = None,
+) -> dict:
     path = Path(image_path)
-    img = read_png(path) if path.suffix.lower() == ".png" else None
+    img = source_image or (read_png(path) if path.suffix.lower() == ".png" else None)
     if img is None:
         raise ValueError("matte builder requires PNG input (convert first)")
     rem = matte_optional_rembg(path)
@@ -71,9 +79,11 @@ def build_matte(image_path: str | Path, out_path: str | Path) -> dict:
     # bbox of opaque
     minx, miny, maxx, maxy = result.width, result.height, 0, 0
     opaque = 0
+    rgba = result.rgba
     for y in range(result.height):
+        row = y * result.width
         for x in range(result.width):
-            if result.pixel(x, y)[3] > 128:
+            if rgba[(row + x) * 4 + 3] > 128:
                 opaque += 1
                 minx, miny = min(minx, x), min(miny, y)
                 maxx, maxy = max(maxx, x), max(maxy, y)

@@ -24,18 +24,19 @@ def mask_iou(ref_matte: Image, render: Image) -> float:
     w = min(ref_matte.width, render.width)
     h = min(ref_matte.height, render.height)
     a = resize_nearest(ref_matte, w, h)
-    b = resize_nearest(render, w, h)
+    rendered = resize_nearest(render, w, h)
+    matte_rgba = a.rgba
+    render_rgba = rendered.rgba
     # render: luma threshold as proxy if no alpha
     inter = union = 0
-    for y in range(h):
-        for x in range(w):
-            pa = a.pixel(x, y)[3] > 128
-            r, g, bch, al = b.pixel(x, y)
-            # dark-background heuristic when render lacks cutout alpha
-            lum = (r + g + bch) / 3.0
-            pb = (al > 128) and (lum > 18)
-            inter += int(pa and pb)
-            union += int(pa or pb)
+    for i in range(0, len(matte_rgba), 4):
+        pa = matte_rgba[i + 3] > 128
+        r, g, bch, al = render_rgba[i], render_rgba[i + 1], render_rgba[i + 2], render_rgba[i + 3]
+        # dark-background heuristic when render lacks cutout alpha
+        lum = (r + g + bch) / 3.0
+        pb = (al > 128) and (lum > 18)
+        inter += int(pa and pb)
+        union += int(pa or pb)
     return inter / union if union else 0.0
 
 
@@ -63,14 +64,15 @@ def edge_f1(ref_edges: Image, render: Image) -> float:
     W = H = 96
     re = resize_nearest(ref_edges, W, H)
     se = sobel_edges(resize_nearest(render, W, H))
+    ref_rgba = re.rgba
+    sobel_rgba = se.rgba
     tp = fp = fn = 0
-    for y in range(H):
-        for x in range(W):
-            rt = re.pixel(x, y)[0] > 64
-            pt = se.pixel(x, y)[0] > 64
-            tp += int(rt and pt)
-            fp += int(pt and not rt)
-            fn += int(rt and not pt)
+    for i in range(0, len(ref_rgba), 4):
+        rt = ref_rgba[i] > 64
+        pt = sobel_rgba[i] > 64
+        tp += int(rt and pt)
+        fp += int(pt and not rt)
+        fn += int(rt and not pt)
     prec = tp / (tp + fp) if tp + fp else 0.0
     rec = tp / (tp + fn) if tp + fn else 0.0
     if prec + rec == 0:

@@ -12,6 +12,10 @@ def _ts_name(name: str) -> str:
     return "".join(p[:1].upper() + p[1:] for p in parts) or "Object"
 
 
+def _geom_key(g: dict) -> str:
+    return json.dumps(g or {"kind": "box", "size": [1, 1, 1]}, sort_keys=True, separators=(",", ":"))
+
+
 def _geom_js(g: dict) -> str:
     kind = g.get("kind", "box")
     if kind == "box":
@@ -37,7 +41,7 @@ def _geom_js(g: dict) -> str:
     return f"new THREE.BoxGeometry({s[0]}, {s[1]}, {s[2]})"
 
 
-def _emit_part(p: dict, materials_map: str, parent_expr: str, indent: int = 2) -> str:
+def _emit_part(materials_map: str, p: dict, parent_expr: str, indent: int = 2) -> str:
     """Emit mesh and parent it under parent_expr (group or another mesh)."""
     pad = " " * indent
     pid = p["id"]
@@ -49,9 +53,9 @@ def _emit_part(p: dict, materials_map: str, parent_expr: str, indent: int = 2) -
     mid = p.get("materialId", "mat_primary")
     lines = [
         f"{pad}{{",
-        f"{pad}  const g_{safe} = {_geom_js(p.get('geometry') or {})};",
+        f"{pad}  const g_{safe} = getGeometry({json.dumps(_geom_key(p.get('geometry') or {}))}, () => {_geom_js(p.get('geometry') or {})});",
         f"{pad}  const m_{safe} = {materials_map}[{json.dumps(mid)}] ?? {materials_map}[Object.keys({materials_map})[0]];",
-        f"{pad}  const mesh_{safe} = new THREE.Mesh(g_{safe}, m_{safe}.clone());",
+        f"{pad}  const mesh_{safe} = new THREE.Mesh(g_{safe}, m_{safe});",
         f"{pad}  mesh_{safe}.name = {json.dumps(pid)};",
         f"{pad}  mesh_{safe}.position.set({pos[0]}, {pos[1]}, {pos[2]});",
         f"{pad}  mesh_{safe}.rotation.set({rot[0]}, {rot[1]}, {rot[2]});",
@@ -62,7 +66,7 @@ def _emit_part(p: dict, materials_map: str, parent_expr: str, indent: int = 2) -
         f"{pad}  nodes[{json.dumps(pid)}] = mesh_{safe};",
     ]
     for ch in p.get("children") or []:
-        lines.append(_emit_part(ch, materials_map, f"mesh_{safe}", indent + 2))
+        lines.append(_emit_part(materials_map, ch, f"mesh_{safe}", indent + 2))
     lines.append(f"{pad}}}")
     return "\n".join(lines)
 
@@ -88,7 +92,7 @@ def emit_factory(blueprint: dict[str, Any], out_path: str | Path) -> str:
     )
 
     parts_code = "\n".join(
-        _emit_part(p, "materials", "group") for p in blueprint.get("parts") or []
+        _emit_part("materialRegistry", p, "group") for p in blueprint.get("parts") or []
     )
 
     handles = blueprint.get("handles") or {}
@@ -119,15 +123,25 @@ export function create{name}Form(
   const group = new THREE.Group();
   group.name = {json.dumps(blueprint.get("name") or name)};
 
-  const materials: Record<string, THREE.MeshPhysicalMaterial> = {{
+  const materialRegistry: Record<string, THREE.MeshPhysicalMaterial> = {{
 {mat_block}
   }};
 
   if (options.wireframe) {{
-    for (const m of Object.values(materials)) {{
+    for (const m of Object.values(materialRegistry)) {{
       m.wireframe = true;
     }}
   }}
+
+  const geometryRegistry = new Map<string, THREE.BufferGeometry>();
+  const getGeometry = (key: string, create: () => THREE.BufferGeometry): THREE.BufferGeometry => {{
+    let geometry = geometryRegistry.get(key);
+    if (!geometry) {{
+      geometry = create();
+      geometryRegistry.set(key, geometry);
+    }}
+    return geometry;
+  }};
 
   const nodes: Record<string, THREE.Object3D> = {{}};
 
