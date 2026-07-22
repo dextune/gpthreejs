@@ -236,26 +236,34 @@ class IterationGraph:
         *,
         critical_ids: set[str],
     ) -> list[dict[str, Any]]:
-        base = {m["id"]: m for m in baseline_metrics if "id" in m}
+        base = {
+            (m["id"], str(m.get("viewId") or "")): m
+            for m in baseline_metrics
+            if "id" in m
+        }
         regressions = []
         for metric in candidate_metrics:
             mid = metric.get("id")
-            if mid not in critical_ids or mid not in base:
+            key = (mid, str(metric.get("viewId") or ""))
+            if mid not in critical_ids or key not in base:
                 continue
-            if float(metric.get("value") or 0) + 1e-9 < float(base[mid].get("value") or 0):
-                if base[mid].get("passed") and not metric.get("passed"):
+            baseline = base[key]
+            if float(metric.get("value") or 0) + 1e-9 < float(baseline.get("value") or 0):
+                if baseline.get("passed") and not metric.get("passed"):
                     regressions.append(
                         {
                             "metricId": mid,
-                            "baseline": base[mid].get("value"),
+                            "viewId": metric.get("viewId"),
+                            "baseline": baseline.get("value"),
                             "candidate": metric.get("value"),
                         }
                     )
-                elif float(metric.get("value") or 0) < float(base[mid].get("value") or 0) - 0.05:
+                elif float(metric.get("value") or 0) < float(baseline.get("value") or 0) - 0.05:
                     regressions.append(
                         {
                             "metricId": mid,
-                            "baseline": base[mid].get("value"),
+                            "viewId": metric.get("viewId"),
+                            "baseline": baseline.get("value"),
                             "candidate": metric.get("value"),
                         }
                     )

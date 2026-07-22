@@ -39,6 +39,7 @@ def metrics_from_render_set(
     *,
     reference_alpha: dict[str, str] | None = None,
     view_id: str = "source-34",
+    view_ids: tuple[str, ...] | list[str] | None = None,
     require_external_reference: bool = False,
 ) -> list[dict[str, Any]]:
     """Build metric entries from on-disk render passes (no hardcoded scores).
@@ -47,11 +48,38 @@ def metrics_from_render_set(
     Self-comparison against a blueprint re-render is not used.
     """
 
+    if view_ids is not None:
+        ordered = list(dict.fromkeys(str(candidate) for candidate in view_ids))
+        return [
+            metric
+            for candidate in ordered
+            for metric in metrics_from_render_set(
+                blueprint,
+                render_set,
+                reference_alpha=reference_alpha,
+                view_id=candidate,
+                require_external_reference=require_external_reference,
+            )
+        ]
+
     alpha_path = _pass_path(render_set, view_id, "alpha")
     part_path = _pass_path(render_set, view_id, "partId")
     beauty_path = _pass_path(render_set, view_id, "beauty")
 
     bbox = alpha_bbox(alpha_path)
+    ref_path = (reference_alpha or {}).get(view_id)
+    external = bool(ref_path and Path(str(ref_path)).is_file())
+    # Detect accidental self-baseline: same path as render alpha.
+    if external and Path(str(ref_path)).resolve() == Path(alpha_path).resolve():
+        external = False
+        ref_path = None
+    reference_bbox = alpha_bbox(ref_path) if external else None
+    target_bbox = reference_bbox or {"x": 0.275, "y": 0.275, "w": 0.45, "h": 0.45, "occupancy": 0.45}
+    center_error = (
+        ((bbox["x"] + bbox["w"] / 2) - (target_bbox["x"] + target_bbox["w"] / 2)) ** 2
+        + ((bbox["y"] + bbox["h"] / 2) - (target_bbox["y"] + target_bbox["h"] / 2)) ** 2
+    ) ** 0.5
+    occupancy_error = abs(float(bbox.get("occupancy", 0)) - float(target_bbox.get("occupancy", 0)))
     framing = {
         "id": "camera_framing",
         "target": "framing",
@@ -59,28 +87,18 @@ def metrics_from_render_set(
         "pass": "alpha",
         "value": max(
             0.0,
-            1.0
-            - (
-                ((bbox["x"] + bbox["w"] / 2) - 0.5) ** 2
-                + ((bbox["y"] + bbox["h"] / 2) - 0.5) ** 2
-            )
-            ** 0.5
-            * 2
-            - abs(bbox.get("occupancy", 0) - 0.45),
+            1.0 - center_error * 2 - occupancy_error,
         ),
         "threshold": 0.45,
         "passed": False,
-        "details": bbox,
+        "details": {
+            "render": bbox,
+            "reference": reference_bbox,
+            "externalReference": external,
+        },
         "evidencePath": str(alpha_path),
     }
     framing["passed"] = framing["value"] >= framing["threshold"]
-
-    ref_path = (reference_alpha or {}).get(view_id)
-    external = bool(ref_path and Path(str(ref_path)).is_file())
-    # Detect accidental self-baseline: same path as render alpha
-    if external and Path(str(ref_path)).resolve() == Path(alpha_path).resolve():
-        external = False
-        ref_path = None
 
     if external:
         iou = silhouette_iou(alpha_path, ref_path)
@@ -113,6 +131,8 @@ def metrics_from_render_set(
             "details": {
                 "requireExternalReference": require_external_reference,
                 "missingExternalMatte": require_external_reference and not external,
+                "render": bbox,
+                "reference": reference_bbox,
             },
         },
         {
@@ -125,6 +145,7 @@ def metrics_from_render_set(
             "passed": float(bf) >= bf_thr and (external or not require_external_reference),
             "evidencePath": str(alpha_path),
             "externalReference": external,
+            "details": {"render": bbox, "reference": reference_bbox},
         },
         {
             "id": "contour_distance",
@@ -134,7 +155,7 @@ def metrics_from_render_set(
             "value": cont_score,
             "threshold": cont_thr,
             "passed": cont_score >= cont_thr and (external or not require_external_reference),
-            "details": {"rawDistance": contour},
+            "details": {"rawDistance": contour, "render": bbox, "reference": reference_bbox},
             "evidencePath": str(alpha_path),
             "externalReference": external,
         },
@@ -299,6 +320,7 @@ def metric_report_from_render_set(
     *,
     reference_alpha: dict[str, str] | None = None,
     view_id: str = "source-34",
+    view_ids: tuple[str, ...] | list[str] | None = None,
     require_external_reference: bool = False,
 ) -> dict[str, Any]:
     metrics = metrics_from_render_set(
@@ -306,6 +328,7 @@ def metric_report_from_render_set(
         render_set,
         reference_alpha=reference_alpha,
         view_id=view_id,
+        view_ids=view_ids,
         require_external_reference=require_external_reference,
     )
     report = build_metric_report(
@@ -315,4 +338,5 @@ def metric_report_from_render_set(
     )
     report["externalReference"] = any(m.get("externalReference") for m in metrics)
     report["requireExternalReference"] = require_external_reference
+    report["evaluatedViews"] = list(view_ids) if view_ids is not None else [view_id]
     return report

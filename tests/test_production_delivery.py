@@ -136,25 +136,18 @@ class ProductionDeliveryPathTests(unittest.TestCase):
         )
         self.assertTrue(result.ok, result.errors)
 
-    def test_run_includes_journal_and_policy(self) -> None:
-        # Use multi-view golden project so external photo mattes are available
+    def test_run_rejects_insufficient_multiview_fixture_before_cast(self) -> None:
+        # Multi-view presence does not override low-resolution/consistency blockers.
         project = ROOT / "tests/golden/knight/project.json"
         with tempfile.TemporaryDirectory() as td:
             result = run_production(project, max_iterations=1, out_dir=Path(td) / "out")
-            for stage in ("render", "metrics", "review", "journal"):
-                self.assertIn(stage, result["stages"])
-            self.assertTrue(result["artifacts"].get("formRuntimeContract"))
-            self.assertTrue(result["artifacts"].get("referenceAlphaExternal"))
-            entry = result["artifacts"].get("journalEntry")
-            self.assertIsInstance(entry, dict)
-            self.assertTrue(entry["policyTrace"].get("policyIssued"))
-            self.assertEqual(entry["policyTrace"].get("issuer"), "review-policy")
-            mr = load_json(result["artifacts"]["metricReport"])
-            sil = next(m for m in mr["metrics"] if m["id"] == "silhouette_iou")
-            self.assertTrue(sil.get("externalReference"))
-            self.assertLess(float(sil["value"]), 0.999)
-            for m in mr["metrics"]:
-                self.assertTrue(Path(m["evidencePath"]).is_file(), m)
+            self.assertFalse(result["ok"])
+            self.assertEqual(result["reason"], "reference sufficiency rejected")
+            self.assertEqual(result["stages"], ["reference"])
+            self.assertEqual(result["extra"]["sufficiency"]["agentAction"], "abort")
+            self.assertEqual(result["extra"]["sufficiency"]["verdict"], "reject")
+            self.assertNotIn("factory", result["artifacts"])
+            self.assertNotIn("renderSet", result["artifacts"])
 
     def test_delivery_export_fail_closed_single_view(self) -> None:
         project = ROOT / "tests/golden/knight-single-view/project.json"
@@ -195,32 +188,19 @@ class ProductionDeliveryPathTests(unittest.TestCase):
             # Must not claim external reference on self-only path
             self.assertFalse(dg06.get("externalReference", True))
 
-    def test_delivery_export_success_with_multiview_external_matte(self) -> None:
-        """Honest delivery-grade success: multi-view ReferenceSet + photo matte evidence."""
+    def test_delivery_export_rejects_insufficient_multiview_fixture(self) -> None:
+        """Delivery export cannot bypass production reference rejection."""
         project = ROOT / "tests/golden/knight/project.json"
         with tempfile.TemporaryDirectory() as td:
             out = Path(td) / "delivery"
             result = delivery_export(project, out_dir=out, max_iterations=0)
-            self.assertTrue(result.get("ok"), result.get("checklist"))
+            self.assertFalse(result.get("ok"))
             checklist = result["checklist"]
-            self.assertTrue(checklist["passed"])
-            self.assertTrue(checklist["gates"]["DG-06"].get("externalReference"))
-            self.assertTrue(checklist["gates"]["DG-09"]["passed"])
-            bundle = Path(result["bundle"])
-            factory = bundle / "factory.ts"
-            if not factory.exists():
-                factory = bundle / "portable" / "factory.ts"
-            text = factory.read_text(encoding="utf-8")
-            self.assertNotIn("../engine/", text)
-            self.assertIn("FormRuntime", text)
-            self.assertGreater(len(list((bundle / "renders").rglob("*.png"))), 0)
-            # metric report must mark external silhouette reference
-            mr = load_json(bundle / "reports" / "metric-report.json")
-            sil = next(m for m in mr["metrics"] if m["id"] == "silhouette_iou")
-            self.assertTrue(sil.get("externalReference"))
-            self.assertIsNotNone(sil.get("referencePath"))
-            self.assertNotEqual(Path(sil["referencePath"]).resolve(), Path(sil["evidencePath"]).resolve())
-            self.assertLess(sil["value"], 0.999)  # not byte-identical self-IoU theater
+            self.assertFalse(checklist["passed"])
+            self.assertEqual(result["run"]["stages"], ["reference"])
+            self.assertFalse(result["run"]["ok"])
+            self.assertIsNone(result["bundle"])
+            self.assertTrue((out / "delivery-failed.json").is_file())
 
     def test_delivery_export_cli(self) -> None:
         with tempfile.TemporaryDirectory() as td:

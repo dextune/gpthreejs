@@ -12,6 +12,7 @@ def patches_for_issues(
     issues_or_metrics: list[dict[str, Any]],
     *,
     step: int = 1,
+    document: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     """
     Produce a limited JSON Patch list from failed metrics / review issues.
@@ -20,7 +21,7 @@ def patches_for_issues(
     """
 
     patches: list[dict[str, Any]] = []
-    delta = 0.03 * (1 if step % 2 else -1)
+    fallback_delta = 0.03 * (1 if step % 2 else -1)
 
     for item in issues_or_metrics:
         mid = str(item.get("id") or item.get("criterionId") or item.get("metricId") or "")
@@ -31,30 +32,54 @@ def patches_for_issues(
         scope = map_issue_to_scope(mid)
         root = scope["root"]
         if root == "renderProfiles" or mid == "camera_framing":
+            details = item.get("details") or {}
+            render_bbox = details.get("render") or {}
+            reference_bbox = details.get("reference") or {}
+            render_occ = float(render_bbox.get("occupancy") or 0)
+            reference_occ = float(reference_bbox.get("occupancy") or 0)
+            if reference_occ > 0 and render_occ > 0:
+                magnitude = min(0.12, max(0.02, abs(render_occ - reference_occ) * 0.5))
+                camera_delta = magnitude if render_occ > reference_occ else -magnitude
+            else:
+                camera_delta = fallback_delta
+            profile_index, camera_axis, camera_sign = _camera_patch_target(
+                document,
+                str(item.get("viewId") or "source-34"),
+            )
             patches.append(
                 {
                     "op": "replace",
-                    "path": "/renderProfiles/0/camera/position/2",
+                    "path": f"/renderProfiles/{profile_index}/camera/position/{camera_axis}",
                     "value": None,  # filled by apply against document
-                    "_relativeDelta": delta,
-                    "_pathHint": "camera_z",
+                    "_relativeDelta": camera_delta * camera_sign,
+                    "_pathHint": "camera_distance",
                 }
             )
         elif mid in ("silhouette_iou", "boundary_f", "contour_distance") or scope["scope"] == "mass":
-            patches.append(
-                {
-                    "op": "replace",
-                    "path": "/proportionProfile/shoulderWidthRatio",
-                    "_relativeDelta": delta * 0.5,
-                    "_pathHint": "shoulder",
-                }
-            )
+            details = item.get("details") or {}
+            render_bbox = details.get("render") or {}
+            reference_bbox = details.get("reference") or {}
+            for axis, key in ((0, "w"), (1, "h")):
+                rendered = float(render_bbox.get(key) or 0)
+                target = float(reference_bbox.get(key) or 0)
+                if rendered > 0 and target > 0:
+                    mass_delta = min(0.12, max(-0.12, (target / rendered - 1.0) * 0.25))
+                else:
+                    mass_delta = fallback_delta * 0.5
+                patches.append(
+                    {
+                        "op": "replace",
+                        "path": f"/parts/0/transform/scale/{axis}",
+                        "_relativeDelta": mass_delta,
+                        "_pathHint": f"root_scale_{'xy'[axis]}",
+                    }
+                )
         elif mid in ("part_visibility", "landmark_coverage") or root == "poseProfile":
             patches.append(
                 {
                     "op": "replace",
                     "path": "/poseProfile/joints/pelvis/rotation/1",
-                    "_relativeDelta": delta,
+                    "_relativeDelta": fallback_delta,
                     "_pathHint": "pelvis_yaw",
                 }
             )
@@ -63,7 +88,7 @@ def patches_for_issues(
                 {
                     "op": "replace",
                     "path": "/parts/0/transform/scale/0",
-                    "_relativeDelta": delta * 0.25,
+                    "_relativeDelta": fallback_delta * 0.25,
                     "_pathHint": "root_scale_x",
                 }
             )
@@ -72,7 +97,7 @@ def patches_for_issues(
                 {
                     "op": "replace",
                     "path": "/environment/exposure",
-                    "_relativeDelta": abs(delta),
+                    "_relativeDelta": abs(fallback_delta),
                     "_pathHint": "exposure",
                 }
             )
@@ -145,7 +170,7 @@ def apply_issue_driven_patch(
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     from engine.critique.iteration import apply_json_patch
 
-    raw = patches_for_issues(issues_or_metrics, step=step)
+    raw = patches_for_issues(issues_or_metrics, step=step, document=document)
     base = deepcopy(document)
     if not raw:
         return base, []
@@ -153,6 +178,22 @@ def apply_issue_driven_patch(
     if not concrete:
         return base, []
     return apply_json_patch(base, concrete), concrete
+
+
+def _camera_patch_target(
+    document: dict[str, Any] | None,
+    view_id: str,
+) -> tuple[int, int, float]:
+    for index, profile in enumerate((document or {}).get("renderProfiles") or []):
+        if profile.get("id") == view_id or profile.get("view") == view_id:
+            camera = profile.get("camera") or {}
+            position = list(camera.get("position") or [0.0, 1.0, 2.4])
+            look_at = list(camera.get("lookAt") or [0.0, 1.0, 0.0])
+            offsets = [float(position[axis]) - float(look_at[axis]) for axis in range(3)]
+            axis = max(range(3), key=lambda candidate: abs(offsets[candidate]))
+            sign = -1.0 if offsets[axis] < 0 else 1.0
+            return index, axis, sign
+    return 0, 2, 1.0
 
 
 def _get_pointer(doc: Any, path: str) -> Any:

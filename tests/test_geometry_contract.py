@@ -114,6 +114,78 @@ class GeometryContractTests(unittest.TestCase):
             with self.assertRaisesRegex(UnsupportedGeometryError, "mystery-shape"):
                 emit_factory(blueprint, Path(td) / "factory.ts")
 
+    def test_emitter_preserves_rounded_cloth_and_instance_topology(self) -> None:
+        blueprint = {
+            "version": 1,
+            "name": "TopologyProbe",
+            "materials": [{"id": "mat_primary", "baseColor": "#ffffff"}],
+            "parts": [
+                {
+                    "id": "rounded_shell",
+                    "geometry": {
+                        "kind": "rounded-box",
+                        "size": [1.0, 0.5, 0.25],
+                        "radius": 0.08,
+                        "segments": 3,
+                    },
+                    "materialId": "mat_primary",
+                    "children": [],
+                },
+                {
+                    "id": "cape",
+                    "geometry": {
+                        "kind": "cloth-patch",
+                        "width": 0.4,
+                        "height": 0.6,
+                        "drape": 0.12,
+                        "segments": [5, 7],
+                    },
+                    "materialId": "mat_primary",
+                    "children": [],
+                },
+                {
+                    "id": "studs",
+                    "geometry": {
+                        "kind": "instance-set",
+                        "prototype": {"kind": "sphere", "radius": 0.01},
+                        "count": 6,
+                        "distribution": {
+                            "kind": "grid",
+                            "columns": 3,
+                            "spacing": [0.04, 0.03],
+                        },
+                    },
+                    "materialId": "mat_primary",
+                    "children": [],
+                },
+            ],
+        }
+
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td) / "factory.ts"
+            emit_factory(blueprint, out)
+            text = out.read_text(encoding="utf-8")
+
+        self.assertIn(
+            'import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";',
+            text,
+        )
+        self.assertIn("new RoundedBoxGeometry(size[0], size[1], size[2]", text)
+        self.assertIn("radius: 0.08, segments: 3", text)
+        self.assertNotIn("void radius", text)
+
+        self.assertIn("new THREE.PlaneGeometry(width, height, widthSegments, heightSegments)", text)
+        self.assertIn("g.translate(0, -height / 2, 0)", text)
+        self.assertIn("drape: 0.12, segments: [5.0, 7.0]", text)
+        self.assertIn("pos.setZ(i, -drape * fall * fall + fold)", text)
+        self.assertIn("g.computeVertexNormals()", text)
+
+        self.assertIn("new THREE.InstancedMesh(geometry, material, count)", text)
+        self.assertIn("for (let i = 0; i < count; i++)", text)
+        self.assertIn("instances.setMatrixAt(i, dummy.matrix)", text)
+        self.assertIn("count: 6", text)
+        self.assertIn('distribution: {"kind":"grid","columns":3,"spacing":[0.04,0.03]}', text)
+
 
 if __name__ == "__main__":
     unittest.main()

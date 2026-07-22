@@ -101,8 +101,8 @@ class GapClosureTests(unittest.TestCase):
         updated, concrete = apply_issue_driven_patch(bp, failed, step=1)
         self.assertTrue(concrete)
         self.assertNotEqual(
-            (updated.get("proportionProfile") or {}).get("shoulderWidthRatio"),
-            (bp.get("proportionProfile") or {}).get("shoulderWidthRatio"),
+            updated["parts"][0]["transform"]["scale"][:2],
+            bp["parts"][0]["transform"]["scale"][:2],
         )
 
         with tempfile.TemporaryDirectory() as td:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 from typing import Any, Callable
 
@@ -39,6 +40,7 @@ def evaluate_blueprint_render_metrics(
     work_dir: str | Path,
     reference_alpha: dict[str, str] | None = None,
     view_id: str = "source-34",
+    view_ids: tuple[str, ...] | list[str] | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Render alpha/part-ID passes and compute metrics from the PNG files."""
 
@@ -49,13 +51,14 @@ def evaluate_blueprint_render_metrics(
     work.mkdir(parents=True, exist_ok=True)
     rev = (blueprint.get("revision") or {}).get("id") or "rev-eval"
     bp_hash = content_hash(blueprint, ignored_paths=(("revision", "contentHash"),))
+    requested_views = tuple(view_ids or (view_id,))
     render_set = render_blueprint_set(
         blueprint,
         out_dir=work / "renders",
         revision_id=str(rev),
         blueprint_hash=bp_hash,
         factory_hash=content_hash({"eval": True}),
-        views=(view_id,),
+        views=requested_views,
         width=96,
         height=96,
     )
@@ -65,6 +68,7 @@ def evaluate_blueprint_render_metrics(
         render_set,
         reference_alpha=reference_alpha,
         view_id=view_id,
+        view_ids=requested_views,
     )
     return metrics, render_set
 
@@ -77,12 +81,16 @@ def coarse_to_fine_fit(
     stages: tuple[str, ...] = ("camera", "global_mass", "major_part"),
     work_dir: str | Path | None = None,
     critical_ids: set[str] | None = None,
+    reference_alpha: dict[str, str] | None = None,
+    reference_provenance: dict[str, Any] | None = None,
     use_issue_patches: bool = False,
 ) -> dict[str, Any]:
     """
     Render-in-loop coarse-to-fine MVP with critical regression rollback.
 
     When ``evaluate`` is omitted, uses real software-render alpha/part-ID metrics.
+    A caller-supplied reference alpha is normalized and used instead of a
+    Blueprint self-baseline.
     When ``use_issue_patches`` is true, failed metrics drive constrained JSON patches
     (ITER-110) instead of fixed stage perturbations only.
     """
@@ -98,26 +106,45 @@ def coarse_to_fine_fit(
     }
 
     from engine.critique.issue_patch import apply_issue_driven_patch
-    from engine.critique.software_render import reference_alpha_from_blueprint
 
     ref_dir = work / "fit-ref"
     ref_dir.mkdir(parents=True, exist_ok=True)
-    ref_alpha = {
-        "source-34": reference_alpha_from_blueprint(
-            blueprint,
-            view_id="source-34",
-            out_path=ref_dir / "source-34-alpha.png",
-            width=96,
-            height=96,
+    if reference_alpha:
+        ref_alpha, ref_provenance = _prepare_external_reference_alpha(
+            reference_alpha,
+            ref_dir=ref_dir,
+            metadata=reference_provenance,
         )
-    }
+    else:
+        from engine.critique.software_render import reference_alpha_from_blueprint
+
+        ref_alpha = {
+            "source-34": reference_alpha_from_blueprint(
+                blueprint,
+                view_id="source-34",
+                out_path=ref_dir / "source-34-alpha.png",
+                width=96,
+                height=96,
+            )
+        }
+        ref_provenance = {
+            "source": "blueprint-self-baseline",
+            "external": False,
+            "selfBaseline": True,
+            "sourcePaths": {},
+            "resolvedPaths": dict(ref_alpha),
+            "metadata": {},
+        }
 
     def default_evaluate(bp: dict[str, Any]) -> list[dict[str, Any]]:
+        from engine.critique.render_profiles import VIEW_PROFILE_IDS
+
+        evaluation_views = tuple(view for view in VIEW_PROFILE_IDS if view in ref_alpha) or ("source-34",)
         metrics, _rs = evaluate_blueprint_render_metrics(
             bp,
             work_dir=work / f"eval-{budget.iterations}",
             reference_alpha=ref_alpha,
-            view_id="source-34",
+            view_ids=evaluation_views,
         )
         return metrics
 
@@ -246,11 +273,51 @@ def coarse_to_fine_fit(
         "history": history,
         "budget": budget.to_dict(),
         "graph": graph.to_dict(),
-        "objective": "alpha/part-id metrics from software render PNGs",
+        "objective": "multi-view external alpha/part-id metrics from software render PNGs",
         "proxyUsed": False,
         "referenceAlpha": ref_alpha,
+        "referenceProvenance": ref_provenance,
         "issueDrivenPatches": use_issue_patches,
     }
+
+
+def _prepare_external_reference_alpha(
+    reference_alpha: dict[str, str],
+    *,
+    ref_dir: Path,
+    metadata: dict[str, Any] | None,
+) -> tuple[dict[str, str], dict[str, Any]]:
+    from engine.shared.pngio import read_png, resize_nearest, write_png
+
+    source_paths: dict[str, str] = {}
+    source_hashes: dict[str, str] = {}
+    resolved_paths: dict[str, str] = {}
+    for view, value in reference_alpha.items():
+        source_path = Path(str(value))
+        if not source_path.is_file():
+            raise FileNotFoundError(f"external reference alpha not found: {source_path}")
+        image = read_png(source_path)
+        if image.width != 96 or image.height != 96:
+            image = resize_nearest(image, 96, 96)
+        resolved_path = ref_dir / f"{view}-external-alpha.png"
+        write_png(resolved_path, image)
+        source_paths[str(view)] = str(source_path)
+        source_hashes[str(view)] = hashlib.sha256(source_path.read_bytes()).hexdigest()
+        resolved_paths[str(view)] = str(resolved_path)
+    if not resolved_paths:
+        raise ValueError("external reference_alpha must include at least one view")
+    return (
+        resolved_paths,
+        {
+            "source": "caller-external",
+            "external": True,
+            "selfBaseline": False,
+            "sourcePaths": source_paths,
+            "sourceHashes": source_hashes,
+            "resolvedPaths": resolved_paths,
+            "metadata": dict(metadata or {}),
+        },
+    )
 
 
 def _perturb_for_stage(blueprint: dict[str, Any], stage: str, *, step: int) -> dict[str, Any]:

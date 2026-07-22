@@ -77,6 +77,20 @@ def run_production(
         plan = {"agentAction": "continue", "note": "project supplied blueprint directly"}
         suf = {"sufficient": True, "verdict": "pass"}
 
+    sufficiency_action = str(suf.get("agentAction") or "").lower()
+    sufficiency_verdict = str(suf.get("verdict") or "").lower()
+    if sufficiency_action in ("abort", "reject") or sufficiency_verdict == "reject":
+        return _result(
+            stages,
+            artifacts,
+            ok=False,
+            reason="reference sufficiency rejected",
+            extra={
+                "sufficiency": suf,
+                "planAction": plan.get("agentAction") if isinstance(plan, dict) else None,
+            },
+        )
+
     # 2) blueprint validate / character slice
     stages.append("validate")
     blueprint_path = _resolve_path(project.get("blueprintPath"), project_dir)
@@ -109,15 +123,95 @@ def run_production(
         if not result.ok and project.get("strict", True):
             return _result(stages, artifacts, ok=False, reason="blueprint validation failed", extra=result.to_dict())
 
+    # Resolve external photo/sense mattes before fitting. No blueprint self-render
+    # is accepted as a production reference.
+    alpha_resolution = resolve_reference_alpha_map(
+        project=project,
+        project_dir=project_dir,
+        out_dir=root / "reference-mattes",
+        reference_set_path=reference_set_path,
+        view_id="source-34",
+        width=128,
+        height=128,
+    )
+    reference_alpha = alpha_resolution.get("map") or {}
+    artifacts["referenceAlphaMeta"] = alpha_resolution.get("meta") or {}
+    artifacts["referenceAlphaExternal"] = bool(
+        (alpha_resolution.get("meta") or {}).get("external")
+    )
+    if reference_alpha.get("source-34"):
+        artifacts["referenceAlphaPath"] = reference_alpha["source-34"]
+    dump_json(root / "reference-alpha-map.json", alpha_resolution)
+
+    delivery_grade = str(
+        project.get("deliveryGrade")
+        or (load_json(request_path).get("deliveryGrade") if request_path and Path(request_path).exists() else None)
+        or "standard"
+    )
+
+    # Fit before cast so the accepted candidate becomes the delivered source.
+    iteration_result = None
+    if max_iterations > 0:
+        stages.append("iterate")
+        assert_production_fit_path([])
+        budget = IterationBudget(max_iterations=max_iterations, max_renders=max_iterations * 3)
+        try:
+            iteration_result = coarse_to_fine_fit(
+                blueprint,
+                budget=budget,
+                work_dir=root / "fit",
+                reference_alpha=reference_alpha if reference_alpha else None,
+                reference_provenance=alpha_resolution.get("meta") or None,
+                use_issue_patches=True,
+            )
+        except Exception as exc:
+            artifacts["fitError"] = {"type": type(exc).__name__, "message": str(exc)}
+            return _result(
+                stages,
+                artifacts,
+                ok=False,
+                reason="fit failed",
+                extra={"error": artifacts["fitError"]},
+            )
+        promoted = iteration_result.get("blueprint")
+        if not isinstance(promoted, dict):
+            artifacts["fitError"] = {
+                "type": "FitContractError",
+                "message": "fit result did not include a blueprint",
+            }
+            return _result(
+                stages,
+                artifacts,
+                ok=False,
+                reason="fit failed",
+                extra={"error": artifacts["fitError"]},
+            )
+        blueprint = promoted
+        bp_write_path = root / "blueprint.json"
+        dump_json(bp_write_path, blueprint)
+        blueprint_path = bp_write_path
+        artifacts["blueprintWorking"] = str(bp_write_path)
+        artifacts["promotedBlueprint"] = str(bp_write_path)
+        dump_json(root / "iteration.json", iteration_result)
+        artifacts["iteration"] = str(root / "iteration.json")
+
     # 3) cast
     stages.append("cast")
     factory_path = root / "factory.ts"
+    factory_path.unlink(missing_ok=True)
     try:
         emit_factory(blueprint, factory_path)
     except Exception as exc:
-        factory_path.write_text(
-            f"// cast incomplete for this blueprint: {exc}\nexport function createForm() {{ return null; }}\n",
-            encoding="utf-8",
+        artifacts["castError"] = {
+            "type": type(exc).__name__,
+            "message": str(exc),
+        }
+        return _result(
+            stages,
+            artifacts,
+            ok=False,
+            reason="cast failed",
+            extra={"error": artifacts["castError"]},
         )
     artifacts["factory"] = str(factory_path)
     # FormRuntime contract present in emitted source
@@ -175,46 +269,25 @@ def run_production(
     )
     artifacts["renderCache"] = cache.stats()
 
-    # External reference alpha only (photo/sense matte) — never blueprint self-render.
-    alpha_resolution = resolve_reference_alpha_map(
-        project=project,
-        project_dir=project_dir,
-        out_dir=root / "reference-mattes",
-        reference_set_path=reference_set_path,
-        view_id="source-34",
-        width=128,
-        height=128,
-    )
-    reference_alpha = alpha_resolution.get("map") or {}
-    artifacts["referenceAlphaMeta"] = alpha_resolution.get("meta") or {}
-    artifacts["referenceAlphaExternal"] = bool(
-        (alpha_resolution.get("meta") or {}).get("external")
-    )
-    if reference_alpha.get("source-34"):
-        artifacts["referenceAlphaPath"] = reference_alpha["source-34"]
-    dump_json(root / "reference-alpha-map.json", alpha_resolution)
-
-    delivery_grade = str(
-        project.get("deliveryGrade")
-        or (load_json(request_path).get("deliveryGrade") if request_path and Path(request_path).exists() else None)
-        or "standard"
-    )
-
     # 5) metrics — silhouette vs EXTERNAL photo/sense matte when available
     stages.append("metrics")
+    rendered_view_ids = [str(view.get("id")) for view in render_set.get("views") or []]
+    reference_view_ids = tuple(view for view in rendered_view_ids if view in reference_alpha)
+    evaluated_view_ids = reference_view_ids or ("source-34",)
     metric_report = metric_report_from_render_set(
         blueprint,
         render_set,
         reference_alpha=reference_alpha if reference_alpha else None,
         view_id="source-34",
+        view_ids=evaluated_view_ids,
         require_external_reference=(delivery_grade in ("delivery", "strict")),
     )
     metrics = metric_report.get("metrics") or []
     # also store flat legacy keys for journal floor checks
     flat_metrics = {
-        "maskIoU": next((m["value"] for m in metrics if m.get("id") == "silhouette_iou"), 0.0),
-        "ssim": next((m["value"] for m in metrics if m.get("id") == "boundary_f"), 0.0),
-        "edgeF1": next((m["value"] for m in metrics if m.get("id") == "contour_distance"), 0.0),
+        "maskIoU": min((m["value"] for m in metrics if m.get("id") == "silhouette_iou"), default=0.0),
+        "ssim": min((m["value"] for m in metrics if m.get("id") == "boundary_f"), default=0.0),
+        "edgeF1": min((m["value"] for m in metrics if m.get("id") == "contour_distance"), default=0.0),
         "entries": metrics,
     }
     dump_json(root / "metric-report.json", metric_report)
@@ -323,21 +396,6 @@ def run_production(
             dump_json(working_bp, bp_data)
             journal_entry = entry
             artifacts["journalEntry"] = entry
-
-    # optional iteration with issue-driven patches + critical regression rollback
-    iteration_result = None
-    if max_iterations > 0:
-        stages.append("iterate")
-        assert_production_fit_path([])
-        budget = IterationBudget(max_iterations=max_iterations, max_renders=max_iterations * 3)
-        iteration_result = coarse_to_fine_fit(
-            blueprint,
-            budget=budget,
-            work_dir=root / "fit",
-            use_issue_patches=True,
-        )
-        dump_json(root / "iteration.json", iteration_result)
-        artifacts["iteration"] = str(root / "iteration.json")
 
     ok = review_report.get("recommendation") == "accept"
     return _result(

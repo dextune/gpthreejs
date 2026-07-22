@@ -59,8 +59,10 @@ def _geom_js(g: dict) -> str:
     if kind == "rounded-box":
         s = g.get("size", [1, 1, 1])
         radius = g.get("radius", 0.05)
+        segments = int(g.get("segments", 4))
         return (
-            f"geomHelpers.roundedBox({{ size: {_js_num_list(s)}, radius: {float(radius)} }})"
+            f"geomHelpers.roundedBox({{ size: {_js_num_list(s)}, radius: {float(radius)}, "
+            f"segments: {segments} }})"
         )
     if kind == "shape-extrude":
         shape = g.get("shape") or [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]]
@@ -114,14 +116,14 @@ def _geom_js(g: dict) -> str:
         width = g.get("width", 0.3)
         height = g.get("height", 0.4)
         drape = g.get("drape", 0.1)
+        segments = g.get("segments", 8)
+        segments_js = _js_num_list(segments) if isinstance(segments, list) else str(int(segments))
         return (
             f"geomHelpers.clothPatch({{ width: {float(width)}, height: {float(height)}, "
-            f"drape: {float(drape)} }})"
+            f"drape: {float(drape)}, segments: {segments_js} }})"
         )
     if kind == "instance-set":
-        proto = g.get("prototype") or {"kind": "sphere", "radius": 0.01}
-        count = int(g.get("count", 1))
-        return f"geomHelpers.instanceSet({{ prototype: () => {_geom_js(proto)}, count: {count} }})"
+        raise UnsupportedGeometryError("nested instance-set geometry is not supported")
     if kind == "shield":
         width = g.get("width", 0.55)
         height = g.get("height", 0.7)
@@ -161,10 +163,9 @@ const geomHelpers = {
   torus({ radius, tube }: { radius: number; tube: number }) {
     return new THREE.TorusGeometry(radius, tube, 12, 24);
   },
-  roundedBox({ size, radius }: { size: number[]; radius: number }) {
-    // Approximate rounded box with standard box; radius reserved for future BevelGeometry.
-    void radius;
-    return new THREE.BoxGeometry(size[0], size[1], size[2], 2, 2, 2);
+  roundedBox({ size, radius, segments = 4 }: { size: number[]; radius: number; segments?: number }) {
+    const safeRadius = Math.max(0, Math.min(radius, size[0] / 2, size[1] / 2, size[2] / 2));
+    return new RoundedBoxGeometry(size[0], size[1], size[2], Math.max(1, Math.floor(segments)), safeRadius);
   },
   shapeExtrude({ shape, depth, bevel = 0 }: { shape: number[][]; depth: number; bevel?: number }) {
     const s = new THREE.Shape();
@@ -204,21 +205,91 @@ const geomHelpers = {
     void barbCount;
     return new THREE.ConeGeometry(width / 2, length, 8);
   },
-  clothPatch({ width, height, drape }: { width: number; height: number; drape: number }) {
-    const g = new THREE.PlaneGeometry(width, height, 6, 6);
+  clothPatch({ width, height, drape, segments = 8 }: { width: number; height: number; drape: number; segments?: number | number[] }) {
+    const widthSegments = Math.max(2, Math.floor(Array.isArray(segments) ? segments[0] : segments));
+    const heightSegments = Math.max(2, Math.floor(Array.isArray(segments) ? (segments[1] ?? segments[0]) : segments));
+    const g = new THREE.PlaneGeometry(width, height, widthSegments, heightSegments);
+    g.translate(0, -height / 2, 0);
     const pos = g.attributes.position as THREE.BufferAttribute;
     for (let i = 0; i < pos.count; i++) {
       const y = pos.getY(i);
       const x = pos.getX(i);
-      pos.setZ(i, Math.sin((y / Math.max(height, 1e-6)) * Math.PI) * drape * 0.5 + x * 0.01);
+      const u = x / Math.max(width, 1e-6) + 0.5;
+      const v = -y / Math.max(height, 1e-6);
+      const fall = Math.max(0, Math.min(1, v));
+      const fold = Math.sin(u * Math.PI * 4) * drape * 0.12 * fall;
+      pos.setZ(i, -drape * fall * fall + fold);
     }
     pos.needsUpdate = true;
     g.computeVertexNormals();
     return g;
   },
-  instanceSet({ prototype, count }: { prototype: () => THREE.BufferGeometry; count: number }) {
-    void count;
-    return prototype();
+  instanceSet({ geometry, material, count, distribution }: {
+    geometry: THREE.BufferGeometry;
+    material: THREE.Material;
+    count: number;
+    distribution: unknown;
+  }) {
+    if (!Number.isInteger(count) || count < 1) throw new Error("instance-set count must be a positive integer");
+    const spec = typeof distribution === "string"
+      ? { kind: distribution } as Record<string, unknown>
+      : distribution && typeof distribution === "object" && !Array.isArray(distribution)
+        ? distribution as Record<string, unknown>
+        : (() => { throw new Error("instance-set distribution must be a string or object"); })();
+    const kind = String(spec.kind ?? spec.type ?? (Array.isArray(spec.positions) ? "explicit" : "grid"));
+    geometry.computeBoundingBox();
+    const boundsSize = new THREE.Vector3();
+    geometry.boundingBox?.getSize(boundsSize);
+    const defaultSpacing = Math.max(boundsSize.x, boundsSize.y, boundsSize.z, 0.01) * 1.5;
+    const rawSpacing = spec.spacing;
+    const spacing = Array.isArray(rawSpacing)
+      ? [
+          Number(rawSpacing[0] ?? defaultSpacing),
+          Number(rawSpacing[1] ?? rawSpacing[0] ?? defaultSpacing),
+          Number(rawSpacing[2] ?? rawSpacing[0] ?? defaultSpacing),
+        ]
+      : [Number(rawSpacing ?? defaultSpacing), Number(rawSpacing ?? defaultSpacing), Number(rawSpacing ?? defaultSpacing)];
+    const instances = new THREE.InstancedMesh(geometry, material, count);
+    const dummy = new THREE.Object3D();
+    const axis = spec.axis === "x" || spec.axis === "y" ? spec.axis : "z";
+    const positions = Array.isArray(spec.positions) ? spec.positions : null;
+    const columns = Math.max(1, Math.min(count, Math.floor(Number(spec.columns ?? Math.ceil(Math.sqrt(count))))));
+    const rows = Math.ceil(count / columns);
+    const radius = Number(spec.radius ?? Math.max(spacing[0], spacing[1]) * Math.max(count, 3) / (Math.PI * 2));
+    for (let i = 0; i < count; i++) {
+      dummy.position.set(0, 0, 0);
+      if (kind === "explicit" || kind === "positions") {
+        const point = positions?.[i];
+        if (!Array.isArray(point) || point.length < 3) {
+          throw new Error(`instance-set explicit distribution is missing position ${i}`);
+        }
+        dummy.position.set(Number(point[0]), Number(point[1]), Number(point[2]));
+      } else if (kind === "grid") {
+        const a = (i % columns - (columns - 1) / 2) * spacing[0];
+        const b = (Math.floor(i / columns) - (rows - 1) / 2) * spacing[1];
+        if (axis === "x") dummy.position.set(0, a, b);
+        else if (axis === "y") dummy.position.set(a, 0, b);
+        else dummy.position.set(a, b, 0);
+      } else if (kind === "line") {
+        const offset = (i - (count - 1) / 2) * spacing[0];
+        if (axis === "x") dummy.position.x = offset;
+        else if (axis === "y") dummy.position.y = offset;
+        else dummy.position.z = offset;
+      } else if (kind === "ring") {
+        const angle = count === 1 ? 0 : i / count * Math.PI * 2;
+        const a = Math.cos(angle) * radius;
+        const b = Math.sin(angle) * radius;
+        if (axis === "x") dummy.position.set(0, a, b);
+        else if (axis === "y") dummy.position.set(a, 0, b);
+        else dummy.position.set(a, b, 0);
+      } else {
+        throw new Error(`unsupported instance-set distribution: ${kind}`);
+      }
+      dummy.updateMatrix();
+      instances.setMatrixAt(i, dummy.matrix);
+    }
+    instances.instanceMatrix.needsUpdate = true;
+    return instances;
   },
   shield({ width, height, depth }: { width: number; height: number; depth: number }) {
     const shape: number[][] = [
@@ -244,11 +315,27 @@ def _emit_part(materials_map: str, p: dict, parent_expr: str, indent: int = 2) -
     rot = t.get("rotation") or [0, 0, 0]
     scl = t.get("scale") or [1, 1, 1]
     mid = p.get("materialId", "mat_primary")
+    geometry = p.get("geometry") or {}
+    geometry_key = geometry
+    mesh_expression = f"new THREE.Mesh(g_{safe}, m_{safe})"
+    if geometry.get("kind") == "instance-set":
+        raw_count = geometry.get("count", 1)
+        if isinstance(raw_count, bool) or not isinstance(raw_count, (int, float)):
+            raise ValueError(f"instance-set {pid!r} count must be a positive integer")
+        count = int(raw_count)
+        if count < 1 or float(raw_count) != count:
+            raise ValueError(f"instance-set {pid!r} count must be a positive integer")
+        geometry_key = geometry.get("prototype") or {"kind": "sphere", "radius": 0.01}
+        distribution = geometry.get("distribution", "grid")
+        mesh_expression = (
+            f"geomHelpers.instanceSet({{ geometry: g_{safe}, material: m_{safe}, count: {count}, "
+            f"distribution: {json.dumps(distribution, separators=(',', ':'))} }})"
+        )
     lines = [
         f"{pad}{{",
-        f"{pad}  const g_{safe} = getGeometry({json.dumps(_geom_key(p.get('geometry') or {}))}, () => {_geom_js(p.get('geometry') or {})});",
+        f"{pad}  const g_{safe} = getGeometry({json.dumps(_geom_key(geometry_key))}, () => {_geom_js(geometry_key)});",
         f"{pad}  const m_{safe} = {materials_map}[{json.dumps(mid)}] ?? {materials_map}[Object.keys({materials_map})[0]];",
-        f"{pad}  const mesh_{safe} = new THREE.Mesh(g_{safe}, m_{safe});",
+        f"{pad}  const mesh_{safe} = {mesh_expression};",
         f"{pad}  mesh_{safe}.name = {json.dumps(pid)};",
         f"{pad}  mesh_{safe}.position.set({pos[0]}, {pos[1]}, {pos[2]});",
         f"{pad}  mesh_{safe}.rotation.set({rot[0]}, {rot[1]}, {rot[2]});",
@@ -304,6 +391,7 @@ def emit_factory(blueprint: dict[str, Any], out_path: str | Path) -> str:
  * Keep bodySource truthful if you swap in an external mesh shell.
  */
 import * as THREE from "three";
+import {{ RoundedBoxGeometry }} from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 
 export type FormBlueprint = Record<string, unknown>;
 
