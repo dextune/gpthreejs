@@ -36,16 +36,16 @@ jobs:
           node-version: "20"
       - name: Install demo deps
         run: npm --prefix demo ci --include=dev
+      - name: Provision Playwright Chromium
+        run: npm --prefix demo exec -- playwright install --with-deps chromium
+      - name: Preflight
+        run: npm --prefix demo run preflight
       - name: Typecheck and build
         run: |
           npm --prefix demo run typecheck
           npm --prefix demo run build
-      - name: Preflight
-        run: npm --prefix demo run preflight
       - name: Runtime smoke
-        run: |
-          npm --prefix demo run provision:browser
-          npm --prefix demo run test:runtime
+        run: npm --prefix demo run test:runtime
 
   portability:
     runs-on: ubuntu-latest
