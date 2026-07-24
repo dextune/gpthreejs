@@ -92,7 +92,7 @@ Use these terms in artifacts and summaries:
 | **Cast layers** | ordered implementation strata |
 | **Critique Journal** | per-layer evidence, scores, metrics, and decision |
 | **FormHandles** | pivots, sockets, colliders, and break groups on `root.userData.formHandles` |
-| **Decision** | `accept` | `replan` | `recode` | `ask` | `abort` |
+| **Decision** | `accept` \| `replan` \| `recode` \| `ask` \| `abort` |
 
 ## Mandatory decision path
 
