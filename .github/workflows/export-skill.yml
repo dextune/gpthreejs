@@ -1,0 +1,25 @@
+name: Export skill archive
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/export-skill.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove git metadata
+        run: rm -rf .git
+      - name: Upload skill archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpthreejs-skill
+          path: .
+          include-hidden-files: true
+          retention-days: 1
