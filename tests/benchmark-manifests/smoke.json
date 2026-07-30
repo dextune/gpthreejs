@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "name": "smoke",
+  "description": "Initial smoke set using repository-local golden fixtures for regression checking.",
+  "fixtures": [
+    {
+      "id": "knight-multiview",
+      "category": "character",
+      "profile": "stylized-character",
+      "source": {
+        "type": "repo-local-sample",
+        "license": "unverified; repository-local provenance audit pending",
+        "provenance": "tests/golden/knight - generated for pipeline regression testing"
+      },
+      "projectPath": "../golden/knight/project.json",
+      "expectedRoute": "reference→validate→cast→render→metrics→review",
+      "requiredPasses": ["beauty", "alpha", "partId"],
+      "views": [
+        {"id": "source-34", "role": "primary"},
+        {"id": "front", "role": "turnaround"},
+        {"id": "left", "role": "turnaround"},
+        {"id": "right", "role": "turnaround"},
+        {"id": "back", "role": "turnaround"}
+      ],
+      "heldOutViews": []
+    },
+    {
+      "id": "knight-single-view",
+      "category": "character",
+      "profile": "stylized-character",
+      "source": {
+        "type": "repo-local-sample",
+        "license": "unverified; repository-local provenance audit pending",
+        "provenance": "tests/golden/knight-single-view - single-view character variant"
+      },
+      "projectPath": "../golden/knight-single-view/project.json",
+      "expectedRoute": "reference→validate→cast→render→metrics→review",
+      "requiredPasses": ["beauty", "alpha", "partId"],
+      "views": [
+        {"id": "source-34", "role": "primary"}
+      ],
+      "heldOutViews": []
+    },
+    {
+      "id": "hard-surface-shield",
+      "category": "hard-surface",
+      "profile": "hard-surface-hero",
+      "source": {
+        "type": "repo-local-sample",
+        "license": "unverified; repository-local provenance audit pending",
+        "provenance": "tests/golden/hard-surface-shield - isolated prop for hard-surface path"
+      },
+      "projectPath": "../golden/hard-surface-shield/project.json",
+      "expectedRoute": "reference→validate→cast→render→metrics→review",
+      "requiredPasses": ["beauty", "alpha"],
+      "views": [
+        {"id": "front", "role": "primary"}
+      ],
+      "heldOutViews": []
+    },
+    {
+      "id": "generic-crate",
+      "category": "generic-prop",
+      "profile": "generic-prop",
+      "source": {
+        "type": "repo-local-sample",
+        "license": "unverified; repository-local provenance audit pending",
+        "provenance": "tests/golden/generic-crate - simple prop for baseline validation"
+      },
+      "projectPath": "../golden/generic-crate/project.json",
+      "expectedRoute": "reference→validate→cast→render→metrics→review",
+      "requiredPasses": ["beauty", "alpha"],
+      "views": [
+        {"id": "front", "role": "primary"}
+      ],
+      "heldOutViews": []
+    },
+    {
+      "id": "knight-mutated-side",
+      "category": "character",
+      "profile": "stylized-character",
+      "source": {
+        "type": "repo-local-sample",
+        "license": "unverified; repository-local provenance audit pending",
+        "provenance": "tests/golden/knight-mutated-side - intentional consistency failure fixture"
+      },
+      "projectPath": "../golden/knight-mutated-side/project.json",
+      "expectedRoute": "reference→validate→cast→render→metrics→review",
+      "requiredPasses": ["beauty", "alpha", "partId"],
+      "views": [
+        {"id": "front", "role": "primary"},
+        {"id": "left", "role": "turnaround"}
+      ],
+      "heldOutViews": []
+    }
+  ]
+}
