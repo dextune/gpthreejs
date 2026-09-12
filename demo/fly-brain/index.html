@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no" />
+  <meta name="theme-color" content="#dff4ee" />
+  <meta name="description" content="Fly Brain — a tiny 2.5D Three.js browser game powered by 166,700 questionable neurons." />
+  <title>FLY BRAIN</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main id="game" aria-label="Fly Brain browser game">
+    <div id="scene" aria-hidden="true"></div>
+
+    <div class="grain" aria-hidden="true"></div>
+
+    <header class="hud hud-top" aria-live="polite">
+      <div class="best-wrap">
+        <span class="hud-label">HIGH SCORE</span>
+        <strong id="bestScore">0</strong>
+      </div>
+      <div id="score" class="score">0</div>
+      <button id="soundToggle" class="icon-button" type="button" aria-label="Toggle sound" title="Toggle sound">
+        <span class="sound-icon">●</span>
+      </button>
+    </header>
+
+    <aside id="scienceHud" class="science-hud" aria-live="polite">
+      <span class="science-dot"></span>
+      <div>
+        <strong id="scienceTitle">NEURAL ACTIVITY</strong>
+        <span id="scienceText">166,700 NEURONS READY</span>
+      </div>
+    </aside>
+
+    <section id="startPanel" class="panel start-panel">
+      <p class="eyebrow">166,700 NEURONS · 1 FLY · ZERO FEAR</p>
+      <h1>FLY<br /><span>BRAIN</span></h1>
+      <p class="tagline">Tiny brain. Huge confidence.</p>
+      <div class="input-pill">
+        <span class="mouse-mark" aria-hidden="true"></span>
+        <span>CLICK · TAP · SPACE</span>
+      </div>
+      <p class="microcopy">Flap through a suspiciously oversized human world.</p>
+    </section>
+
+    <section id="gameOverPanel" class="panel gameover-panel is-hidden" aria-live="assertive">
+      <p class="eyebrow danger">SYSTEM NOTICE</p>
+      <h2>BRAIN OFFLINE</h2>
+      <div class="results">
+        <div><span>SCORE</span><strong id="finalScore">0</strong></div>
+        <div><span>BEST</span><strong id="finalBest">0</strong></div>
+      </div>
+      <button id="retry" class="retry-button" type="button">RETRY</button>
+      <p class="microcopy">No flies were emotionally prepared for this experiment.</p>
+    </section>
+
+    <footer class="footer-note">CONNECTOME BUILD 166.7K · FLY IQ: QUESTIONABLE</footer>
+  </main>
+
+  <script src="./vendor/three.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js'"></script>
+  <script src="./main.js"></script>
+</body>
+</html>
