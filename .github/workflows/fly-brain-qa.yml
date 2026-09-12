@@ -1,0 +1,89 @@
+name: Fly Brain QA
+
+on:
+  push:
+    branches:
+      - agent/fly-brain-game
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render-and-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Bundle Three.js runtime
+        run: |
+          mkdir -p demo/fly-brain/vendor
+          curl -fsSL https://raw.githubusercontent.com/mrdoob/three.js/r160/build/three.min.js -o demo/fly-brain/vendor/three.min.js
+          curl -fsSL https://raw.githubusercontent.com/mrdoob/three.js/r160/LICENSE -o demo/fly-brain/THREE-LICENSE.txt
+          test -s demo/fly-brain/vendor/three.min.js
+
+      - name: Static syntax checks
+        run: |
+          node --check demo/fly-brain/main.js
+          test -s demo/fly-brain/index.html
+          test -s demo/fly-brain/style.css
+
+      - name: Install browser QA dependency
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Start local server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory demo/fly-brain > /tmp/fly-brain-server.log 2>&1 &
+          echo $! > /tmp/fly-brain-server.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/fly-brain-server.log
+          exit 1
+
+      - name: Five-pass Chromium render QA
+        run: node .github/qa/fly-brain.mjs
+
+      - name: Write QA summary into release
+        run: |
+          cp /tmp/fly-brain-qa/report.json demo/fly-brain/QA-REPORT.json
+          cat > demo/fly-brain/QA.md <<'EOF'
+          # Browser QA
+
+          The packaged build passed five headless Chromium render checks:
+
+          1. Desktop ready/title composition
+          2. Desktop live gameplay at 1.5x device scale
+          3. Later-game score/difficulty state
+          4. Mobile portrait touch gameplay at 2x device scale
+          5. Collision and game-over presentation
+
+          `QA-REPORT.json` contains renderer metrics captured from each pass.
+          EOF
+
+      - name: Upload final game ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: fly-brain-game
+          path: demo/fly-brain/
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload QA renders
+        uses: actions/upload-artifact@v4
+        with:
+          name: fly-brain-qa-renders
+          path: /tmp/fly-brain-qa/
+          if-no-files-found: error
+          retention-days: 7
