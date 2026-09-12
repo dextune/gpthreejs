@@ -13,7 +13,13 @@ const errors = [];
 const reports = [];
 
 async function makePage(viewport, deviceScaleFactor = 1) {
-  const context = await browser.newContext({ viewport, deviceScaleFactor, hasTouch: viewport.width < 600, isMobile: viewport.width < 600 });
+  const mobile = viewport.width < 600;
+  const context = await browser.newContext({
+    viewport,
+    deviceScaleFactor,
+    hasTouch: mobile,
+    isMobile: mobile
+  });
   const page = await context.newPage();
   page.on('pageerror', (err) => errors.push(`pageerror: ${err.message}`));
   page.on('console', (msg) => {
@@ -24,12 +30,44 @@ async function makePage(viewport, deviceScaleFactor = 1) {
   return { context, page };
 }
 
-async function record(label, page, fileName) {
-  await page.waitForTimeout(250);
-  const metrics = await page.evaluate(() => window.__FLY_BRAIN__.getMetrics());
+async function keepAlive(page, milliseconds) {
+  const steps = Math.ceil(milliseconds / 80);
+  for (let i = 0; i < steps; i += 1) {
+    await page.waitForTimeout(80);
+    const state = await page.evaluate(() => {
+      const game = window.__FLY_BRAIN__;
+      if (game.state !== 1) return game.state;
+      const fly = game.fly;
+      if (fly.root.position.y < 0.05 && fly.velocityY < -1.0) fly.flap();
+      return game.state;
+    });
+    if (state !== 1) break;
+  }
+}
+
+async function record(label, page, fileName, expected = {}) {
+  await page.waitForTimeout(220);
+  const metrics = await page.evaluate(() => {
+    const game = window.__FLY_BRAIN__;
+    return {
+      ...game.getMetrics(),
+      renderPixelRatio: game.rendererSystem.renderer.getPixelRatio()
+    };
+  });
   reports.push({ label, metrics });
-  if (metrics.drawCalls > 130) errors.push(`${label}: draw calls too high (${metrics.drawCalls})`);
-  if (metrics.geometries > 90) errors.push(`${label}: geometry count too high (${metrics.geometries})`);
+
+  if (metrics.drawCalls > 90) errors.push(`${label}: draw calls too high (${metrics.drawCalls})`);
+  if (metrics.geometries > 50) errors.push(`${label}: geometry count too high (${metrics.geometries})`);
+  if (expected.state !== undefined && metrics.state !== expected.state) {
+    errors.push(`${label}: expected state ${expected.state}, got ${metrics.state}`);
+  }
+  if (expected.minScore !== undefined && metrics.score < expected.minScore) {
+    errors.push(`${label}: expected score >= ${expected.minScore}, got ${metrics.score}`);
+  }
+  if (expected.maxPixelRatio !== undefined && metrics.renderPixelRatio > expected.maxPixelRatio + 0.01) {
+    errors.push(`${label}: pixel ratio ${metrics.renderPixelRatio} exceeds ${expected.maxPixelRatio}`);
+  }
+
   await page.screenshot({ path: `${OUT}/${fileName}`, fullPage: true });
 }
 
@@ -37,7 +75,7 @@ async function record(label, page, fileName) {
 {
   const { context, page } = await makePage({ width: 1440, height: 900 }, 1);
   await page.waitForTimeout(650);
-  await record('render-1-desktop-ready', page, '01-desktop-ready.png');
+  await record('render-1-desktop-ready', page, '01-desktop-ready.png', { state: 0 });
   await context.close();
 }
 
@@ -45,11 +83,8 @@ async function record(label, page, fileName) {
 {
   const { context, page } = await makePage({ width: 1440, height: 900 }, 1.5);
   await page.mouse.click(450, 460);
-  for (let i = 0; i < 5; i += 1) {
-    await page.waitForTimeout(240);
-    await page.keyboard.press('Space');
-  }
-  await record('render-2-desktop-running', page, '02-desktop-running.png');
+  await keepAlive(page, 1350);
+  await record('render-2-desktop-running', page, '02-desktop-running.png', { state: 1 });
   await context.close();
 }
 
@@ -58,24 +93,22 @@ async function record(label, page, fileName) {
   const { context, page } = await makePage({ width: 1280, height: 800 }, 1);
   await page.mouse.click(420, 400);
   await page.evaluate(() => window.__FLY_BRAIN__.debugScore(12));
-  for (let i = 0; i < 4; i += 1) {
-    await page.waitForTimeout(210);
-    await page.keyboard.press('Space');
-  }
-  await record('render-3-score-12', page, '03-score-12.png');
+  await keepAlive(page, 1200);
+  await record('render-3-score-12', page, '03-score-12.png', { state: 1, minScore: 12 });
   await context.close();
 }
 
-// Render 4 — mobile portrait touch layout.
+// Render 4 — mobile portrait touch layout and adaptive render quality.
 {
   const { context, page } = await makePage({ width: 390, height: 844 }, 2);
   await page.touchscreen.tap(130, 430);
   await page.evaluate(() => window.__FLY_BRAIN__.debugScore(5));
-  for (let i = 0; i < 5; i += 1) {
-    await page.waitForTimeout(210);
-    await page.touchscreen.tap(130, 430);
-  }
-  await record('render-4-mobile-running', page, '04-mobile-running.png');
+  await keepAlive(page, 900);
+  await record('render-4-mobile-running', page, '04-mobile-running.png', {
+    state: 1,
+    minScore: 5,
+    maxPixelRatio: 1.35
+  });
   await context.close();
 }
 
@@ -88,7 +121,7 @@ async function record(label, page, fileName) {
     window.__FLY_BRAIN__.debugCrash();
   });
   await page.waitForTimeout(700);
-  await record('render-5-game-over', page, '05-game-over.png');
+  await record('render-5-game-over', page, '05-game-over.png', { state: 2, minScore: 8 });
   await context.close();
 }
 
